@@ -56,16 +56,16 @@ npm run dist       # 打包成安装包（macOS .dmg / Windows .exe）
 
 #### 字符（Character）字段说明
 
-| 字段      | 类型           | 备注                                   |
-|-----------|----------------|----------------------------------------|
-| Index     | string         | 必填，唯一标识符                       |
-| Imge      | media（多文件）| 必填 — 字段名有拼写错误，非 "Image"    |
-| Character | string         | 必填，字位                             |
-| Type      | string         | 必填，字种                             |
-| Symbol    | string         | 可选，语符                             |
-| Source    | string         | 可选，文献出处                         |
-| Era       | string         | 可选，时代                             |
-| Usage     | string         | 可选，用法                             |
+| 字段      | 类型            | 备注                                |
+| --------- | --------------- | ----------------------------------- |
+| Index     | string          | 必填，唯一标识符                    |
+| Imge      | media（多文件） | 必填 — 字段名有拼写错误，非 "Image" |
+| Character | string          | 必填，字位                          |
+| Type      | string          | 必填，字种                          |
+| Symbol    | string          | 可选，语符                          |
+| Source    | string          | 可选，文献出处                      |
+| Era       | string          | 可选，时代                          |
+| Usage     | string          | 可选，用法                          |
 
 #### 环境变量
 

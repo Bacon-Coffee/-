@@ -17,7 +17,8 @@
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
       }
       .img-container {
-        min-height: 150px;
+        background-color: #ffffff;
+        height: 160px;
       }
     </style>
   </head>
@@ -121,12 +122,12 @@
             :key="item.id"
             class="calligraphy-card bg-white border border-stone-300 rounded-md transition-all duration-300 cursor-pointer group p-2"
           >
-            <div class="aspect-square bg-stone-50 flex items-center justify-center border-b border-stone-200 p-2 relative img-container">
+            <div class="border-b border-stone-200 relative img-container">
               <img
                 v-if="item.Imge && item.Imge.length"
                 :src="getImageUrl(item.Imge)"
                 :alt="item.Character"
-                class="max-h-full max-w-full object-contain filter group-hover:brightness-95"
+                class="w-full h-full object-contain object-center filter group-hover:brightness-95"
               />
               <div v-else class="text-stone-300 text-sm flex flex-col items-center">
                 <span>🚫</span><span>暂无图片</span>
