@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>日本汉文写本汉方文献用字数据库</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        background-color: #fdfaf2;
+        color: #333;
+        font-family: "楷体", "STKaiti", serif;
+      }
+      .calligraphy-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      }
+      .img-container {
+        min-height: 150px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app" class="container mx-auto px-4 py-8 max-w-7xl">
+      <header class="text-center mb-10">
+        <h1 class="text-4xl font-bold mb-2 text-red-900 tracking-widest">
+          ✒️ 日本汉文写本汉方文献用字数据库
+        </h1>
+        <p class="text-stone-500 text-sm mb-8">共收录 <strong class="text-stone-700">{{ totalCount }}</strong> 条记录</p>
+
+        <!-- 三栏检索框 -->
+        <div class="max-w-3xl mx-auto grid grid-cols-3 gap-3 mb-4">
+          <div class="flex flex-col text-left">
+            <label class="text-xs text-stone-500 mb-1 pl-1">字种（Type）</label>
+            <input
+              v-model="searchType"
+              type="text"
+              placeholder="例：馬"
+              class="p-3 text-base bg-white border-2 border-red-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-700 placeholder-stone-400"
+              @keyup.enter="doSearch"
+            />
+          </div>
+          <div class="flex flex-col text-left">
+            <label class="text-xs text-stone-500 mb-1 pl-1">字位（Character）</label>
+            <input
+              v-model="searchCharacter"
+              type="text"
+              placeholder="例：马"
+              class="p-3 text-base bg-white border-2 border-red-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-700 placeholder-stone-400"
+              @keyup.enter="doSearch"
+            />
+          </div>
+          <div class="flex flex-col text-left">
+            <label class="text-xs text-stone-500 mb-1 pl-1">语符（Symbol）</label>
+            <input
+              v-model="searchSymbol"
+              type="text"
+              placeholder="例：{馬}"
+              class="p-3 text-base bg-white border-2 border-red-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-700 placeholder-stone-400"
+              @keyup.enter="doSearch"
+            />
+          </div>
+        </div>
+
+        <div class="flex justify-center gap-3 mb-4">
+          <button
+            @click="doSearch"
+            class="bg-red-900 text-white px-10 py-3 text-lg font-bold rounded-lg hover:bg-red-800 transition"
+          >
+            检索
+          </button>
+          <button
+            @click="clearSearch"
+            class="bg-stone-200 text-stone-700 px-6 py-3 text-base rounded-lg hover:bg-stone-300 transition"
+          >
+            清空
+          </button>
+        </div>
+
+        <div class="flex justify-center gap-3 text-sm text-stone-600">
+          <span>时代快筛：</span>
+          <span
+            v-for="era in eras"
+            :key="era"
+            @click="quickFilterEra(era)"
+            class="cursor-pointer hover:text-red-700 hover:underline"
+          >{{era}}</span>
+        </div>
+      </header>
+
+      <!-- 加载中 -->
+      <div v-if="loading" class="flex justify-center items-center py-20">
+        <div class="animate-spin rounded-full h-12 w-12 border-4 border-stone-300 border-t-red-900"></div>
+        <span class="ml-4 text-xl text-stone-500">正在翻阅墨迹...</span>
+      </div>
+
+      <!-- 错误提示 -->
+      <div v-else-if="error" class="text-center py-10 text-red-600 text-lg">
+        {{ error }}
+      </div>
+
+      <template v-else>
+        <!-- 分页统计 -->
+        <div class="flex justify-between items-center mb-4 text-sm text-stone-500">
+          <span>
+            找到 <strong class="text-stone-700">{{ totalCount }}</strong> 条记录
+          </span>
+          <span>第 {{ currentPage }} / {{ totalPages }} 页（每页 {{ pageSize }} 条）</span>
+        </div>
+
+        <!-- 无结果 -->
+        <div v-if="characters.length === 0" class="text-center py-20 text-stone-400 text-xl">
+          未找到相关记录
+        </div>
+
+        <!-- 字符卡片网格 -->
+        <div v-else class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+          <div
+            v-for="item in characters"
+            :key="item.id"
+            class="calligraphy-card bg-white border border-stone-300 rounded-md transition-all duration-300 cursor-pointer group p-2"
+          >
+            <div class="aspect-square bg-stone-50 flex items-center justify-center border-b border-stone-200 p-2 relative img-container">
+              <img
+                v-if="item.Imge && item.Imge.length"
+                :src="getImageUrl(item.Imge)"
+                :alt="item.Character"
+                class="max-h-full max-w-full object-contain filter group-hover:brightness-95"
+              />
+              <div v-else class="text-stone-300 text-sm flex flex-col items-center">
+                <span>🚫</span><span>暂无图片</span>
+              </div>
+              <span class="absolute top-1 right-1 text-[10px] text-stone-400 bg-stone-100 px-1 rounded">{{item.Index}}</span>
+            </div>
+
+            <div class="p-3 text-center space-y-2">
+              <div class="text-3xl font-bold text-stone-800">{{item.Character}}</div>
+              <div class="grid grid-cols-2 gap-1 text-xs text-stone-500 text-left bg-stone-50 p-2 rounded">
+                <div><span class="font-bold">字种:</span> {{item.Type || '-'}}</div>
+                <div><span class="font-bold">语符:</span> {{item.Symbol || '-'}}</div>
+                <div><span class="font-bold">时代:</span> {{item.Era || '-'}}</div>
+                <div><span class="font-bold">出处:</span> {{item.Source || '-'}}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 分页控件 -->
+        <div v-if="totalPages > 1" class="mt-10 flex justify-center items-center gap-2 flex-wrap">
+          <button
+            @click="fetchData(currentPage - 1)"
+            :disabled="currentPage <= 1"
+            class="px-4 py-2 rounded border border-stone-300 text-stone-600 hover:bg-stone-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
+          >
+            ← 上一页
+          </button>
+
+          <template v-for="page in paginationRange" :key="String(page)">
+            <span v-if="page === '...'" class="px-2 text-stone-400">…</span>
+            <button
+              v-else
+              @click="fetchData(page)"
+              :class="[
+                'px-3 py-2 rounded border transition',
+                page === currentPage
+                  ? 'bg-red-900 text-white border-red-900 font-bold'
+                  : 'border-stone-300 text-stone-600 hover:bg-stone-100'
+              ]"
+            >
+              {{ page }}
+            </button>
+          </template>
+
+          <button
+            @click="fetchData(currentPage + 1)"
+            :disabled="currentPage >= totalPages"
+            class="px-4 py-2 rounded border border-stone-300 text-stone-600 hover:bg-stone-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
+          >
+            下一页 →
+          </button>
+
+          <div class="flex items-center gap-1 ml-4">
+            <span class="text-sm text-stone-500">跳至</span>
+            <input
+              type="number"
+              v-model.number="jumpPage"
+              :min="1"
+              :max="totalPages"
+              @keyup.enter="fetchData(jumpPage)"
+              class="w-14 px-2 py-2 border border-stone-300 rounded text-center text-sm"
+            />
+            <span class="text-sm text-stone-500">页</span>
+            <button @click="fetchData(jumpPage)" class="text-sm text-red-800 hover:underline ml-1">GO</button>
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <script>
+      const { createApp, ref, computed, onMounted } = Vue;
+
+      createApp({
+        setup() {
+          // ---- 状态 ----
+          const characters  = ref([]);
+          const loading     = ref(true);
+          const error       = ref(null);
+
+          // 三个独立检索字段
+          const searchType      = ref('');  // 字种
+          const searchCharacter = ref('');  // 字位
+          const searchSymbol    = ref('');  // 语符
+
+          // 分页状态
+          const currentPage = ref(1);
+          const pageSize    = ref(20);
+          const totalCount  = ref(0);
+          const totalPages  = ref(0);
+          const jumpPage    = ref(1);
+
+          const eras = ['平安', '东晋', '唐朝', '汉代'];
+
+          const API_TOKEN = 'c21a49ab9d05d68d493c0db6f7f8062e006ffec23ae71d9126041231f913c7ea42e991821e4ef3c4e26c33bd71c9a6bfb7fe834b6e4ebe80d36c81aa2f4ded1108e2b070e0fdf9630446d38fbe296d646e9963f0a485dbbb10619cab72978bbb4e6509883b1027f58a0f13930a1ad139b766b208b4d471473d3eac90be340b29';
+          const API_BASE  = 'http://localhost:1337/api';
+
+          // ---- 图片 URL 解析 ----
+          const getImageUrl = (imgData) => {
+            if (!imgData) return '';
+            const file = Array.isArray(imgData) ? imgData[0] : imgData;
+            if (!file || !file.url) return '';
+            return file.url.startsWith('http') ? file.url : 'http://localhost:1337' + file.url;
+          };
+
+          // ---- 构建 Strapi 查询参数 ----
+          const buildQuery = (page, extraFilters = {}) => {
+            const params = new URLSearchParams();
+            params.append('pagination[page]', page);
+            params.append('pagination[pageSize]', pageSize.value);
+            params.append('populate', 'Imge');
+
+            if (searchType.value.trim())
+              params.append('filters[Type][$contains]', searchType.value.trim());
+            if (searchCharacter.value.trim())
+              params.append('filters[Character][$contains]', searchCharacter.value.trim());
+            if (searchSymbol.value.trim())
+              params.append('filters[Symbol][$contains]', searchSymbol.value.trim());
+
+            // 额外过滤（用于时代快筛）
+            for (const [key, val] of Object.entries(extraFilters)) {
+              params.append(key, val);
+            }
+            return params.toString();
+          };
+
+          // ---- 核心数据获取 ----
+          const fetchData = async (page = 1, extraFilters = {}) => {
+            if (page < 1 || (totalPages.value > 0 && page > totalPages.value)) return;
+            loading.value = true;
+            error.value = null;
+            try {
+              const query = buildQuery(page, extraFilters);
+              const response = await fetch(`${API_BASE}/characters?${query}`, {
+                headers: { Authorization: `Bearer ${API_TOKEN}` },
+              });
+              if (!response.ok) throw new Error(`HTTP ${response.status}`);
+              const result = await response.json();
+              characters.value = result.data || [];
+              const pg = result.meta?.pagination || {};
+              currentPage.value = pg.page      || 1;
+              totalCount.value  = pg.total     || 0;
+              totalPages.value  = pg.pageCount || 1;
+              jumpPage.value    = currentPage.value;
+            } catch (e) {
+              error.value = `加载失败：${e.message}。请确认 Strapi 已启动（http://localhost:1337）`;
+              console.error(e);
+            } finally {
+              loading.value = false;
+            }
+          };
+
+          // ---- 点击"检索"按钮 ----
+          const doSearch = () => {
+            fetchData(1);
+          };
+
+          // ---- 清空检索框 ----
+          const clearSearch = () => {
+            searchType.value      = '';
+            searchCharacter.value = '';
+            searchSymbol.value    = '';
+            fetchData(1);
+          };
+
+          // ---- 时代快速筛选 ----
+          const quickFilterEra = (era) => {
+            searchType.value      = '';
+            searchCharacter.value = '';
+            searchSymbol.value    = '';
+            fetchData(1, { 'filters[Era][$contains]': era });
+          };
+
+          // ---- 分页页码范围（带省略号） ----
+          const paginationRange = computed(() => {
+            const total   = totalPages.value;
+            const current = currentPage.value;
+            if (total <= 7) {
+              return Array.from({ length: total }, (_, i) => i + 1);
+            }
+            const range = new Set([1, total]);
+            for (let i = Math.max(2, current - 2); i <= Math.min(total - 1, current + 2); i++) {
+              range.add(i);
+            }
+            const sorted = Array.from(range).sort((a, b) => a - b);
+            const result = [];
+            for (let i = 0; i < sorted.length; i++) {
+              if (i > 0 && sorted[i] - sorted[i - 1] > 1) result.push('...');
+              result.push(sorted[i]);
+            }
+            return result;
+          });
+
+          onMounted(() => fetchData(1));
+
+          return {
+            characters, loading, error,
+            searchType, searchCharacter, searchSymbol,
+            currentPage, pageSize, totalCount, totalPages, jumpPage,
+            eras,
+            getImageUrl, fetchData, doSearch, clearSearch, quickFilterEra,
+            paginationRange,
+          };
+        },
+      }).mount('#app');
+    </script>
+  </body>
+</html>

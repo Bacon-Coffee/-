@@ -1,0 +1,18 @@
+{
+  "name": "hanzi-database-desktop",
+  "version": "1.0.0",
+  "description": "日本汉文写本汉方文献用字数据库 桌面版",
+  "private": true,
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "electron electron/main.js",
+    "dist": "electron-builder --config electron/builder.config.js",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "electron": "^33.0.0"
+  },
+  "devDependencies": {
+    "electron-builder": "^25.0.0"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(cd my-strapi-project && npm run *)",
+      "Bash(node my-strapi-project/scripts/import-excel.js)",
+      "Bash(ls *)",
+      "Bash(lsof -ti:1337*)"
+    ]
+  }
+}

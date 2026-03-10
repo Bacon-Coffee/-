@@ -1,0 +1,26 @@
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# Node 依赖
+node_modules/
+my-strapi-project/node_modules/
+strapi-project/node_modules/
+
+# 构建产物
+my-strapi-project/dist/
+my-strapi-project/.cache/
+my-strapi-project/build/
+electron/dist/
+
+# 数据库与临时文件
+my-strapi-project/.tmp/
+my-strapi-project/public/uploads/
+
+# 环境变量（含密钥，不提交）
+my-strapi-project/.env
+.env
+
+# 日志
+*.log
+npm-debug.log*
