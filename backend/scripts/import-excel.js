@@ -2,7 +2,7 @@
 
 /**
  * Excel 数据导入脚本
- * 使用方式（在 my-strapi-project/ 目录下）：npm run import
+ * 使用方式（在 backend/ 目录下）：npm run import
  *
  * 前置条件：Strapi 服务已启动（npm run dev 或 npm run start）
  * 注意：图片（Imge 字段）不在此脚本处理范围，需在 Strapi 管理后台手动上传关联。
@@ -14,7 +14,7 @@ const XLSX = require('xlsx');
 // ---- 配置区域 ----
 const EXCEL_PATH = path.resolve(
   __dirname,
-  '../../strapi-project/示例数据-種々薬帳1.xlsx'
+  '../../frontend/示例数据-種々薬帳1.xlsx'
 );
 const STRAPI_URL = process.env.STRAPI_URL || 'http://localhost:1337';
 const API_TOKEN  = process.env.STRAPI_TOKEN ||

@@ -4,7 +4,7 @@
  * Excel 图片全自动导入脚本
  *
  * 功能：从 Excel 内嵌图片中提取，自动上传并关联到对应 Strapi 字符记录
- * 使用：npm run import-images（在 my-strapi-project/ 目录下）
+ * 使用：npm run import-images（在 backend/ 目录下）
  * 前置：Strapi 已启动，且文字数据已导入（npm run import）
  *
  * Strapi 5 正确关联方式：
@@ -20,7 +20,7 @@ const { execSync } = require('child_process');
 // ---- 配置 ----
 const EXCEL_PATH = path.resolve(
   __dirname,
-  '../../strapi-project/示例数据-種々薬帳1.xlsx'
+  '../../frontend/示例数据-種々薬帳1.xlsx'
 );
 const STRAPI_URL = process.env.STRAPI_URL   || 'http://localhost:1337';
 const API_TOKEN  = process.env.STRAPI_TOKEN ||
@@ -325,7 +325,7 @@ async function main() {
   console.log(`  已跳过:   ${skipped} 条（已有图片）`);
   console.log(`  未找到:   ${notFound} 条（Strapi 中无此 Index）`);
   console.log(`  失败:     ${failed} 条`);
-  console.log(`\n请刷新前端页面查看图片: strapi-project/index.html`);
+  console.log(`\n请刷新前端页面查看图片: frontend/index.html`);
 }
 
 main().catch(e => {

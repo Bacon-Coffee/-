@@ -5,9 +5,9 @@
  *
  * 启动流程：
  * 1. 显示"正在启动后端服务"加载窗口
- * 2. 启动 Strapi 子进程（my-strapi-project/）
+ * 2. 启动 Strapi 子进程（backend/）
  * 3. 轮询等待 Strapi 就绪（最长 90 秒）
- * 4. 创建主窗口加载 strapi-project/index.html
+ * 4. 创建主窗口加载 frontend/index.html
  * 5. 应用退出时终止 Strapi 子进程
  */
 
@@ -23,8 +23,8 @@ const REPO_ROOT = IS_PACKAGED
   ? path.join(process.resourcesPath, 'app')
   : path.join(__dirname, '..');
 
-const STRAPI_DIR    = path.join(REPO_ROOT, 'my-strapi-project');
-const FRONTEND_PATH = path.join(REPO_ROOT, 'strapi-project', 'index.html');
+const STRAPI_DIR    = path.join(REPO_ROOT, 'backend');
+const FRONTEND_PATH = path.join(REPO_ROOT, 'frontend', 'index.html');
 const STRAPI_PORT   = 1337;
 const STRAPI_URL    = `http://localhost:${STRAPI_PORT}`;
 
@@ -144,7 +144,7 @@ app.whenReady().then(async () => {
     createWindow();
   } catch (e) {
     loadingWin.close();
-    dialog.showErrorBox('启动失败', e.message + '\n\n请确认 my-strapi-project 依赖已安装（npm install）。');
+    dialog.showErrorBox('启动失败', e.message + '\n\n请确认 backend 依赖已安装（npm install）。');
     app.quit();
   }
 });

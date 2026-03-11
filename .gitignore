@@ -4,21 +4,21 @@ Thumbs.db
 
 # Node 依赖
 node_modules/
-my-strapi-project/node_modules/
-strapi-project/node_modules/
+backend/node_modules/
+frontend/node_modules/
 
 # 构建产物
-my-strapi-project/dist/
-my-strapi-project/.cache/
-my-strapi-project/build/
+backend/dist/
+backend/.cache/
+backend/build/
 electron/dist/
 
 # 数据库与临时文件
-my-strapi-project/.tmp/
-my-strapi-project/public/uploads/
+backend/.tmp/
+backend/public/uploads/
 
 # 环境变量（含密钥，不提交）
-my-strapi-project/.env
+backend/.env
 .env
 
 # 日志

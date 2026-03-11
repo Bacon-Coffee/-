@@ -12,19 +12,19 @@ module.exports = {
   // 打包时包含的文件（相对于根目录 my-repo/）
   files: [
     'electron/**/*',
-    'strapi-project/index.html',
-    'my-strapi-project/dist/**/*',
-    'my-strapi-project/config/**/*',
-    'my-strapi-project/src/**/*',
-    'my-strapi-project/package.json',
-    'my-strapi-project/.env',
+    'frontend/index.html',
+    'backend/dist/**/*',
+    'backend/config/**/*',
+    'backend/src/**/*',
+    'backend/package.json',
+    'backend/.env',
   ],
 
   // 额外资源（不走 asar 压缩，保留目录结构）
   extraResources: [
     {
-      from: 'my-strapi-project/node_modules',
-      to:   'app/my-strapi-project/node_modules',
+      from: 'backend/node_modules',
+      to:   'app/backend/node_modules',
       filter: [
         '**/*',
         '!**/*.map',
@@ -39,8 +39,8 @@ module.exports = {
       ],
     },
     {
-      from: 'my-strapi-project/public',
-      to:   'app/my-strapi-project/public',
+      from: 'backend/public',
+      to:   'app/backend/public',
     },
   ],
 

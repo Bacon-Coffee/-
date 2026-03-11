@@ -3,10 +3,10 @@
 **前置条件：** Strapi 服务已在 1337 端口运行（先执行 `/dev`）
 
 ```bash
-cd my-strapi-project && npm run import
+cd backend && npm run import
 ```
 
-脚本读取 `strapi-project/示例数据-種々薬帳1.xlsx`，解析所有行并通过 REST API 写入数据库。
+脚本读取 `frontend/示例数据-種々薬帳1.xlsx`，解析所有行并通过 REST API 写入数据库。
 
 **注意事项：**
 1. 脚本幂等，可重复运行，Index 已存在的记录会自动跳过
