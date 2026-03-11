@@ -65,17 +65,11 @@ module.exports = {
     ],
   },
 
-  // Windows 配置
+  // Windows 配置（portable 无需 Wine 即可在 macOS 上交叉编译）
   win: {
     target: [
-      { target: 'nsis', arch: ['x64'] },
+      { target: 'portable', arch: ['x64'] },
     ],
-  },
-  nsis: {
-    oneClick: false,
-    allowToChangeInstallationDirectory: true,
-    installerLanguages: ['zh_CN'],
-    language: '2052',
   },
 
   // 输出目录
