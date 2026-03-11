@@ -25,7 +25,18 @@ module.exports = {
     {
       from: 'my-strapi-project/node_modules',
       to:   'app/my-strapi-project/node_modules',
-      filter: ['**/*', '!**/*.map', '!**/test/**', '!**/tests/**', '!**/.github/**'],
+      filter: [
+        '**/*',
+        '!**/*.map',
+        '!**/.strapi/**',
+        '!**/.cache/**',
+        '!**/test/**',
+        '!**/tests/**',
+        '!**/__tests__/**',
+        '!**/.github/**',
+        '!**/docs/**',
+        '!**/examples/**',
+      ],
     },
     {
       from: 'my-strapi-project/public',
