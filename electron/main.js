@@ -12,9 +12,19 @@
  */
 
 const { app, BrowserWindow, dialog } = require('electron');
-const { spawn } = require('child_process');
+const { spawn, execSync } = require('child_process');
 const path = require('path');
 const http = require('http');
+
+// 通过登录 shell 查找可执行文件路径（兼容 nvm / homebrew 等非标准安装）
+function resolveCmd(name) {
+  try {
+    const shell = process.env.SHELL || '/bin/zsh';
+    return execSync(`${shell} -l -c "which ${name}"`, { encoding: 'utf8' }).trim();
+  } catch {
+    return name; // 回退到命令名，让系统自行查找
+  }
+}
 
 // ---- 路径配置 ----
 const IS_PACKAGED = app.isPackaged;
@@ -34,7 +44,9 @@ let mainWindow    = null;
 // ---- 启动 Strapi 子进程 ----
 function startStrapi() {
   console.log('[Electron] 正在启动 Strapi...', STRAPI_DIR);
-  const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+  const npmCmd = process.platform === 'win32' ? 'npm.cmd' : resolveCmd('npm');
+  console.log('[Electron] npm 路径:', npmCmd);
+
   strapiProcess = spawn(npmCmd, ['run', 'start'], {
     cwd: STRAPI_DIR,
     stdio: ['ignore', 'pipe', 'pipe'],
