@@ -240,12 +240,13 @@
             params.append('pagination[pageSize]', pageSize.value);
             params.append('populate', 'Imge');
 
+            let orIdx = 0;
             if (searchType.value.trim())
-              params.append('filters[Type][$contains]', searchType.value.trim());
+              params.append(`filters[$or][${orIdx++}][Type][$contains]`, searchType.value.trim());
             if (searchCharacter.value.trim())
-              params.append('filters[Character][$contains]', searchCharacter.value.trim());
+              params.append(`filters[$or][${orIdx++}][Character][$contains]`, searchCharacter.value.trim());
             if (searchSymbol.value.trim())
-              params.append('filters[Symbol][$contains]', searchSymbol.value.trim());
+              params.append(`filters[$or][${orIdx++}][Symbol][$contains]`, searchSymbol.value.trim());
 
             // 额外过滤（用于时代快筛）
             for (const [key, val] of Object.entries(extraFilters)) {
