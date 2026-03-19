@@ -14,6 +14,7 @@
 const { app, BrowserWindow, dialog } = require('electron');
 const { spawn, execSync } = require('child_process');
 const path = require('path');
+const fs   = require('fs');
 const http = require('http');
 
 // 通过登录 shell 查找可执行文件路径（兼容 nvm / homebrew 等非标准安装）
@@ -29,34 +30,62 @@ function resolveCmd(name) {
 // ---- 路径配置 ----
 const IS_PACKAGED = app.isPackaged;
 
-const REPO_ROOT = IS_PACKAGED
-  ? path.join(process.resourcesPath, 'app')
-  : path.join(__dirname, '..');
+// 打包后 backend 在 extraResources (resources/app/backend/)，不在 asar 内
+const BACKEND_DIR = IS_PACKAGED
+  ? path.join(process.resourcesPath, 'app', 'backend')
+  : path.join(__dirname, '..', 'backend');
 
-const STRAPI_DIR    = path.join(REPO_ROOT, 'backend');
-const FRONTEND_PATH = path.join(REPO_ROOT, 'frontend', 'index.html');
-const STRAPI_PORT   = 1337;
-const STRAPI_URL    = `http://localhost:${STRAPI_PORT}`;
+// 前端 HTML 在 asar 内（开发时在仓库目录）
+const FRONTEND_PATH = IS_PACKAGED
+  ? path.join(process.resourcesPath, 'app.asar', 'frontend', 'index.html')
+  : path.join(__dirname, '..', 'frontend', 'index.html');
+
+const STRAPI_PORT = 1337;
+const STRAPI_URL  = `http://localhost:${STRAPI_PORT}`;
 
 let strapiProcess = null;
 let mainWindow    = null;
 
+// ---- 首次启动时复制种子数据库 ----
+// 注意：Strapi 的 database.js 用 path.join() 而非 path.resolve() 拼接路径，
+// 绝对路径会被当成相对路径。因此直接复制到 backend/.tmp/data.db（默认位置）。
+function ensureDatabase() {
+  if (!IS_PACKAGED) return; // 开发模式使用 backend/.tmp/data.db
+  const dbPath = path.join(BACKEND_DIR, '.tmp', 'data.db');
+  if (fs.existsSync(dbPath)) {
+    console.log('[Electron] 数据库已存在:', dbPath);
+    return;
+  }
+  const seedDb = path.join(BACKEND_DIR, 'data', 'seed.db');
+  if (fs.existsSync(seedDb)) {
+    console.log('[Electron] 首次启动，复制种子数据库...');
+    fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+    fs.copyFileSync(seedDb, dbPath);
+    console.log('[Electron] 数据库已复制到:', dbPath);
+  } else {
+    console.warn('[Electron] 种子数据库不存在:', seedDb);
+  }
+}
+
 // ---- 启动 Strapi 子进程 ----
 function startStrapi() {
-  console.log('[Electron] 正在启动 Strapi...', STRAPI_DIR);
-  const npmCmd = process.platform === 'win32' ? 'npm.cmd' : resolveCmd('npm');
-  console.log('[Electron] npm 路径:', npmCmd);
+  console.log('[Electron] 正在启动 Strapi...', BACKEND_DIR);
 
-  strapiProcess = spawn(npmCmd, ['run', 'start'], {
-    cwd: STRAPI_DIR,
+  const nodeCmd = process.platform === 'win32' ? 'node.exe' : resolveCmd('node');
+  // 打包后使用 start-production.js（跳过 TS 检测），开发模式用 strapi CLI
+  const startScript = IS_PACKAGED
+    ? path.join(BACKEND_DIR, 'start-production.js')
+    : path.join(BACKEND_DIR, 'node_modules', '@strapi', 'strapi', 'bin', 'strapi.js');
+  const startArgs = IS_PACKAGED ? [startScript] : [startScript, 'start'];
+  console.log('[Electron] node 路径:', nodeCmd);
+  console.log('[Electron] 启动脚本:', startScript);
+
+  strapiProcess = spawn(nodeCmd, startArgs, {
+    cwd: BACKEND_DIR,
     stdio: ['ignore', 'pipe', 'pipe'],
     env: {
       ...process.env,
       NODE_ENV: 'production',
-      // 打包后将数据库存入用户数据目录（可写）
-      DATABASE_FILENAME: IS_PACKAGED
-        ? path.join(app.getPath('userData'), 'data.db')
-        : path.join(STRAPI_DIR, '.tmp', 'data.db'),
     },
   });
 
@@ -148,6 +177,7 @@ app.whenReady().then(async () => {
     </body></html>`
   );
 
+  ensureDatabase();
   startStrapi();
 
   try {

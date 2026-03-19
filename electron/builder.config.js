@@ -9,38 +9,38 @@ module.exports = {
   appId:       'com.hanzidb.manuscript',
   productName: '日本汉文写本汉方文献用字数据库',
 
-  // 打包时包含的文件（相对于根目录 my-repo/）
+  // asar 中只保留 Electron 主进程和前端页面
   files: [
     'electron/**/*',
+    '!electron/dist/**',
     'frontend/index.html',
-    'backend/dist/**/*',
-    'backend/config/**/*',
-    'backend/src/**/*',
-    'backend/package.json',
-    'backend/.env',
   ],
 
-  // 额外资源（不走 asar 压缩，保留目录结构）
+  // 后端整体放到 extraResources（Strapi 作为子进程运行，无法读取 asar）
+  // 生产模式只需 dist/（编译产物）、node_modules、public、package.json、.env
+  // 不包含 config/*.ts 和 src/*.ts（源码），避免 Strapi 加载 .ts 报错
   extraResources: [
     {
-      from: 'backend/node_modules',
-      to:   'app/backend/node_modules',
+      from: 'backend',
+      to:   'app/backend',
       filter: [
-        '**/*',
-        '!**/*.map',
-        '!**/.strapi/**',
-        '!**/.cache/**',
-        '!**/test/**',
-        '!**/tests/**',
-        '!**/__tests__/**',
-        '!**/.github/**',
-        '!**/docs/**',
-        '!**/examples/**',
+        'dist/**/*',
+        'start-production.js',
+        'package.json',
+        '.env',
+        'public/**/*',
+        'data/seed.db',
+        'node_modules/**/*',
+        '!node_modules/**/*.map',
+        '!node_modules/**/.strapi/**',
+        '!node_modules/**/.cache/**',
+        '!node_modules/**/test/**',
+        '!node_modules/**/tests/**',
+        '!node_modules/**/__tests__/**',
+        '!node_modules/**/.github/**',
+        '!node_modules/**/docs/**',
+        '!node_modules/**/examples/**',
       ],
-    },
-    {
-      from: 'backend/public',
-      to:   'app/backend/public',
     },
   ],
 
