@@ -14,6 +14,7 @@ module.exports = {
     'electron/**/*',
     '!electron/dist/**',
     'frontend/index.html',
+    'frontend/fonts/**/*',
   ],
 
   // 后端整体放到 extraResources（Strapi 作为子进程运行，无法读取 asar）

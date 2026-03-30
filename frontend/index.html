@@ -7,10 +7,17 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+      @font-face {
+        font-family: "FZSuperCJK";
+        src: url("fonts/FZSuperCJK.ttf") format("truetype");
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
       body {
         background-color: #fdfaf2;
         color: #333;
-        font-family: "楷体", "STKaiti", serif;
+        font-family: "FZSuperCJK", "楷体", "STKaiti", serif;
       }
       .calligraphy-card:hover {
         transform: translateY(-5px);
