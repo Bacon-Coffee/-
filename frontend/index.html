@@ -25,12 +25,247 @@
       }
       .img-container {
         background-color: #ffffff;
-        height: 160px;
+        aspect-ratio: 1 / 1;
+        padding: 4px;
+      }
+
+      /* ==================== 首页（古籍典藏感封面） ==================== */
+      .homepage {
+        position: relative;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        background: radial-gradient(ellipse at center, #fdfaf2 0%, #f0e6cc 100%);
+      }
+      .paper-noise {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.06;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      }
+      .home-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.75rem;
+        padding: 3rem 2rem 5rem;
+      }
+      .hero-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 2.5rem;
+      }
+
+      /* 朱印 */
+      .seal {
+        width: 96px;
+        height: 96px;
+        flex-shrink: 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        place-items: center;
+        background-color: #7f1d1d;
+        border: 4px solid #7f1d1d;
+        color: #fdfaf2;
+        font-size: 26px;
+        font-weight: bold;
+        font-family: "FZSuperCJK", "STKaiti", "楷体", serif;
+        transform: rotate(-3deg);
+        filter: contrast(1.08) brightness(0.96);
+        box-shadow: 0 2px 8px rgba(127, 29, 29, 0.25);
+        margin-top: 14px;
+        opacity: 0;
+        animation: seal-stamp 0.7s ease-out forwards;
+        animation-delay: 0.2s;
+      }
+      .seal span {
+        line-height: 1;
+      }
+
+      /* 竖排标题 */
+      .title-vertical {
+        writing-mode: vertical-rl;
+        font-family: "FZSuperCJK", "楷体", "STKaiti", serif;
+        font-size: clamp(22px, 3.2vh, 38px);
+        color: #7f1d1d;
+        font-weight: bold;
+        letter-spacing: 0.28em;
+        line-height: 1;
+      }
+      .title-vertical span {
+        opacity: 0;
+        display: inline-block;
+        animation: char-drop-in 0.5s ease-out forwards;
+        animation-delay: calc(0.7s + var(--i) * 65ms);
+      }
+
+      /* 副标题 */
+      .subtitle {
+        display: inline-flex;
+        align-items: center;
+        gap: 1.25rem;
+        color: #57534e;
+        font-size: clamp(11px, 1.4vh, 14px);
+        letter-spacing: 0.2em;
+        opacity: 0;
+        animation: fade-in-up 0.6s ease-out forwards;
+        animation-delay: 1.9s;
+      }
+      .subtitle::before,
+      .subtitle::after {
+        content: "";
+        width: 36px;
+        height: 1px;
+        background-color: #a8a29e;
+      }
+
+      /* 进入按钮 */
+      .enter-btn {
+        border: 2px solid #7f1d1d;
+        background-color: transparent;
+        color: #7f1d1d;
+        padding: 14px 44px;
+        font-family: "FZSuperCJK", "楷体", "STKaiti", serif;
+        font-size: 18px;
+        font-weight: bold;
+        letter-spacing: 0.3em;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        opacity: 0;
+        animation: fade-in-up 0.6s ease-out forwards;
+        animation-delay: 2.1s;
+      }
+      .enter-btn:hover {
+        background-color: #7f1d1d;
+        color: #fdfaf2;
+        box-shadow: 0 4px 14px rgba(127, 29, 29, 0.35);
+        transform: translateY(-1px);
+      }
+      .enter-hint {
+        font-size: 11px;
+        color: #a8a29e;
+        letter-spacing: 0.5em;
+        margin-top: 4px;
+        opacity: 0;
+        animation: fade-in-up 0.6s ease-out forwards;
+        animation-delay: 2.25s;
+      }
+
+      /* 底部装饰 */
+      .home-footer {
+        position: absolute;
+        bottom: 24px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        opacity: 0;
+        animation: fade-in-up 0.6s ease-out forwards;
+        animation-delay: 2.4s;
+      }
+      .double-line {
+        width: 220px;
+        height: 5px;
+        margin: 0 auto 10px;
+        border-top: 1px solid #a8a29e;
+        border-bottom: 1px solid #a8a29e;
+      }
+      .home-footer p {
+        font-size: 11px;
+        color: #a8a29e;
+        letter-spacing: 0.12em;
+        margin: 0;
+      }
+
+      /* ---- 入场动画 ---- */
+      @keyframes seal-stamp {
+        0%   { opacity: 0;   transform: rotate(-3deg) scale(0.4); }
+        60%  { opacity: 1;   transform: rotate(-3deg) scale(1.12); }
+        100% { opacity: 1;   transform: rotate(-3deg) scale(1); }
+      }
+      @keyframes char-drop-in {
+        from { opacity: 0; transform: translateY(-8px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes fade-in-up {
+        from { opacity: 0; transform: translateY(8px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+
+      /* ---- 视图切换过渡 ---- */
+      .fade-slide-enter-active,
+      .fade-slide-leave-active {
+        transition: opacity 0.25s ease, transform 0.25s ease;
+      }
+      .fade-slide-enter-from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      .fade-slide-leave-to {
+        opacity: 0;
+        transform: translateY(-8px);
       }
     </style>
   </head>
   <body>
-    <div id="app" class="container mx-auto px-4 py-8 max-w-7xl">
+    <div id="app">
+      <transition name="fade-slide" mode="out-in">
+
+      <!-- ============ 首页（古籍典藏感封面） ============ -->
+      <section v-if="view === 'home'" key="home" class="homepage">
+        <div class="paper-noise"></div>
+
+        <div class="home-content">
+          <div class="hero-row">
+            <!-- 朱印（TODO: 后期可替换为甲方提供的正式 logo/印章） -->
+            <div class="seal" aria-hidden="true">
+              <span>漢</span><span>文</span>
+              <span>寫</span><span>本</span>
+            </div>
+
+            <!-- 竖排楷体大标题 -->
+            <h1 class="title-vertical">
+              <span style="--i: 0">日</span>
+              <span style="--i: 1">本</span>
+              <span style="--i: 2">漢</span>
+              <span style="--i: 3">文</span>
+              <span style="--i: 4">寫</span>
+              <span style="--i: 5">本</span>
+              <span style="--i: 6">漢</span>
+              <span style="--i: 7">方</span>
+              <span style="--i: 8">文</span>
+              <span style="--i: 9">獻</span>
+              <span style="--i: 10">用</span>
+              <span style="--i: 11">字</span>
+              <span style="--i: 12">數</span>
+              <span style="--i: 13">據</span>
+              <span style="--i: 14">庫</span>
+            </h1>
+          </div>
+
+          <!-- 副标题（TODO: 待甲方提供正式简介后替换） -->
+          <div class="subtitle">
+            <span>日本漢文寫本漢方文獻中所見用字之系統輯錄與檢索</span>
+          </div>
+
+          <!-- 进入按钮 -->
+          <button class="enter-btn" @click="enterSearch">進　入　檢　索</button>
+          <div class="enter-hint">點 擊 進 入 數 據 檢 索</div>
+        </div>
+
+        <footer class="home-footer">
+          <div class="double-line"></div>
+          <p>Version 0.1.0 · 日本汉文写本汉方文献用字数据库</p>
+        </footer>
+      </section>
+
+      <!-- ============ 检索页（原有功能） ============ -->
+      <div v-else key="search" class="container mx-auto px-4 py-8 max-w-7xl">
       <header class="text-center mb-10">
         <h1 class="text-4xl font-bold mb-2 text-red-900 tracking-widest">
           ✒️ 日本汉文写本汉方文献用字数据库
@@ -40,7 +275,7 @@
         <!-- 三栏检索框 -->
         <div class="max-w-3xl mx-auto grid grid-cols-3 gap-3 mb-4">
           <div class="flex flex-col text-left">
-            <label class="text-xs text-stone-500 mb-1 pl-1">字种（Type）</label>
+            <label class="text-xs text-stone-500 mb-1 pl-1">字种</label>
             <input
               v-model="searchType"
               type="text"
@@ -50,7 +285,7 @@
             />
           </div>
           <div class="flex flex-col text-left">
-            <label class="text-xs text-stone-500 mb-1 pl-1">字位（Character）</label>
+            <label class="text-xs text-stone-500 mb-1 pl-1">字位</label>
             <input
               v-model="searchCharacter"
               type="text"
@@ -60,7 +295,7 @@
             />
           </div>
           <div class="flex flex-col text-left">
-            <label class="text-xs text-stone-500 mb-1 pl-1">语符（Symbol）</label>
+            <label class="text-xs text-stone-500 mb-1 pl-1">语符</label>
             <input
               v-model="searchSymbol"
               type="text"
@@ -86,14 +321,19 @@
           </button>
         </div>
 
-        <div class="flex justify-center gap-3 text-sm text-stone-600">
-          <span>时代快筛：</span>
-          <span
-            v-for="era in eras"
-            :key="era"
-            @click="quickFilterEra(era)"
-            class="cursor-pointer hover:text-red-700 hover:underline"
-          >{{era}}</span>
+        <div class="flex justify-center items-center gap-2 text-sm text-stone-600">
+          <span class="mr-1">排序方式：</span>
+          <button
+            v-for="opt in sortOptions"
+            :key="opt.value"
+            @click="setSortMode(opt.value)"
+            :class="[
+              'px-3 py-1 rounded border transition',
+              sortMode === opt.value
+                ? 'bg-red-900 text-white border-red-900'
+                : 'border-stone-300 text-stone-600 hover:bg-stone-100'
+            ]"
+          >{{ opt.label }}</button>
         </div>
       </header>
 
@@ -127,6 +367,7 @@
           <div
             v-for="item in characters"
             :key="item.id"
+            @click="openDetail(item)"
             class="calligraphy-card bg-white border border-stone-300 rounded-md transition-all duration-300 cursor-pointer group p-2"
           >
             <div class="border-b border-stone-200 relative img-container">
@@ -199,17 +440,154 @@
               class="w-14 px-2 py-2 border border-stone-300 rounded text-center text-sm"
             />
             <span class="text-sm text-stone-500">页</span>
-            <button @click="fetchData(jumpPage)" class="text-sm text-red-800 hover:underline ml-1">GO</button>
+            <button @click="fetchData(jumpPage)" class="text-sm text-red-800 hover:underline ml-1">跳转</button>
           </div>
         </div>
       </template>
+
+      <!-- ============ 详情模态框 ============ -->
+      <transition
+        enter-active-class="transition duration-200 ease-out"
+        enter-from-class="opacity-0"
+        leave-active-class="transition duration-150 ease-in"
+        leave-to-class="opacity-0"
+      >
+        <div
+          v-if="detailOpen"
+          class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+          @click.self="closeDetail"
+        >
+          <div
+            class="bg-[#fdfaf2] border-2 border-red-900 rounded-lg shadow-2xl w-full max-w-5xl max-h-[92vh] overflow-hidden flex flex-col"
+          >
+            <!-- 头部 -->
+            <div class="flex items-center justify-between px-6 py-3 border-b border-stone-300 bg-white">
+              <div class="flex items-baseline gap-4">
+                <span class="text-xs text-stone-500">{{ selectedItem.Index }}</span>
+                <h2 class="text-3xl font-bold text-red-900">{{ selectedItem.Character }}</h2>
+              </div>
+              <button
+                @click="closeDetail"
+                aria-label="关闭"
+                class="text-stone-400 hover:text-red-900 text-2xl leading-none w-8 h-8 flex items-center justify-center rounded hover:bg-stone-100"
+              >
+                ✕
+              </button>
+            </div>
+
+            <!-- 主体 -->
+            <div class="flex-1 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+              <!-- 左：图片列表 -->
+              <div class="space-y-4">
+                <div
+                  v-if="detailImages.length === 0"
+                  class="aspect-square bg-white border border-stone-300 rounded flex items-center justify-center text-stone-400 text-sm"
+                >
+                  🚫 暂无图片
+                </div>
+                <div
+                  v-for="(img, idx) in detailImages"
+                  :key="idx"
+                  class="relative group/img bg-white border border-stone-300 rounded p-3"
+                >
+                  <img
+                    :src="img.url"
+                    :alt="selectedItem.Character"
+                    @click="openViewer(idx)"
+                    class="w-full h-auto max-h-[50vh] object-contain cursor-zoom-in transition-transform group-hover/img:scale-[1.01]"
+                  />
+                  <div class="flex justify-between items-center mt-2 text-xs text-stone-500 gap-2">
+                    <span class="truncate">{{ img.name }} · {{ img.width }}×{{ img.height }} · {{ formatKB(img.size) }}</span>
+                    <button
+                      @click.stop="downloadImage(img, idx)"
+                      :disabled="downloadingKey === selectedItem.Index + '_' + idx"
+                      class="shrink-0 px-3 py-1 bg-red-900 text-white rounded hover:bg-red-800 disabled:opacity-50 transition text-xs"
+                    >
+                      {{ downloadingKey === selectedItem.Index + '_' + idx ? '下载中…' : '⬇ 下载' }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 右：字段列表 -->
+              <div class="text-base">
+                <div class="bg-white border border-stone-200 rounded divide-y divide-stone-100">
+                  <div
+                    v-for="row in detailFields"
+                    :key="row.label"
+                    class="flex px-4 py-3"
+                  >
+                    <div class="w-24 shrink-0 text-stone-500 text-sm">{{ row.label }}</div>
+                    <div class="flex-1 text-stone-800 break-all whitespace-pre-wrap">{{ row.value || '—' }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </transition>
+
+      <!-- ============ 全屏图片查看器 ============ -->
+      <transition
+        enter-active-class="transition duration-150 ease-out"
+        enter-from-class="opacity-0"
+        leave-active-class="transition duration-150 ease-in"
+        leave-to-class="opacity-0"
+      >
+        <div
+          v-if="viewerOpen"
+          class="fixed inset-0 z-50 bg-black/95 flex items-center justify-center select-none overflow-hidden"
+          @wheel.prevent="onViewerWheel"
+          @mousedown="onViewerMouseDown"
+          @mousemove="onViewerMouseMove"
+          @mouseup="onViewerMouseUp"
+          @mouseleave="onViewerMouseUp"
+          @dblclick="resetViewer"
+        >
+          <!-- 顶部工具条 -->
+          <div
+            class="absolute top-0 left-0 right-0 h-12 flex items-center justify-between px-4 bg-gradient-to-b from-black/60 to-transparent text-white/80 text-sm z-10"
+          >
+            <span>{{ Math.round(zoomScale * 100) }}%</span>
+            <div class="flex gap-2">
+              <button @click.stop="resetViewer" class="px-3 py-1 hover:bg-white/10 rounded">复位</button>
+              <button @click.stop="closeViewer" class="px-3 py-1 hover:bg-white/10 rounded">✕ 关闭</button>
+            </div>
+          </div>
+
+          <img
+            v-if="viewerImages[viewerIndex]"
+            :src="viewerImages[viewerIndex].url"
+            :style="{
+              transform: 'translate(' + zoomTranslateX + 'px, ' + zoomTranslateY + 'px) scale(' + zoomScale + ')',
+              cursor: isDragging ? 'grabbing' : (zoomScale > 1 ? 'grab' : 'zoom-in'),
+              willChange: 'transform',
+            }"
+            class="max-w-none pointer-events-none"
+            draggable="false"
+          />
+
+          <!-- 底部提示 -->
+          <div class="absolute bottom-4 left-0 right-0 text-center text-white/50 text-xs">
+            滚轮缩放 · 拖动平移 · 双击复位 · ESC 关闭
+          </div>
+        </div>
+      </transition>
+      </div>
+      <!-- /检索页 -->
+
+      </transition>
     </div>
 
     <script>
-      const { createApp, ref, computed, onMounted } = Vue;
+      const { createApp, ref, computed, onMounted, onBeforeUnmount } = Vue;
 
       createApp({
         setup() {
+          // ---- 视图状态：'home' = 首页封面，'search' = 检索功能 ----
+          const view = ref('home');
+          const enterSearch = () => { view.value = 'search'; };
+
           // ---- 状态 ----
           const characters  = ref([]);
           const loading     = ref(true);
@@ -222,26 +600,192 @@
 
           // 分页状态
           const currentPage = ref(1);
-          const pageSize    = ref(20);
+          const pageSize    = ref(18);
           const totalCount  = ref(0);
           const totalPages  = ref(0);
           const jumpPage    = ref(1);
 
-          const eras = ['平安', '东晋', '唐朝', '汉代'];
+          // 排序模式：'auto' | 'character' | 'type' | 'symbol'
+          const sortMode = ref('auto');
+
+          const sortOptions = [
+            { value: 'auto',      label: '自动' },
+            { value: 'character', label: '按字位规则' },
+            { value: 'type',      label: '按字种规则' },
+            { value: 'symbol',    label: '按语符规则' },
+          ];
+
+          const SORT_RULES = {
+            character: ['Type:asc', 'Symbol:asc'],
+            type:      ['Symbol:asc', 'Character:asc'],
+            symbol:    ['Type:asc', 'Character:asc'],
+            default:   ['Index:asc'],
+          };
+
+          const getEffectiveSortRule = () => {
+            if (sortMode.value !== 'auto') return sortMode.value;
+            if (searchCharacter.value.trim()) return 'character';
+            if (searchType.value.trim())      return 'type';
+            if (searchSymbol.value.trim())    return 'symbol';
+            return 'default';
+          };
 
           const API_TOKEN = 'c21a49ab9d05d68d493c0db6f7f8062e006ffec23ae71d9126041231f913c7ea42e991821e4ef3c4e26c33bd71c9a6bfb7fe834b6e4ebe80d36c81aa2f4ded1108e2b070e0fdf9630446d38fbe296d646e9963f0a485dbbb10619cab72978bbb4e6509883b1027f58a0f13930a1ad139b766b208b4d471473d3eac90be340b29';
           const API_BASE  = 'http://localhost:1337/api';
 
           // ---- 图片 URL 解析 ----
+          const MEDIA_BASE = 'http://localhost:1337';
+          const resolveImgUrl = (file) => {
+            if (!file || !file.url) return '';
+            return file.url.startsWith('http') ? file.url : MEDIA_BASE + file.url;
+          };
           const getImageUrl = (imgData) => {
             if (!imgData) return '';
             const file = Array.isArray(imgData) ? imgData[0] : imgData;
-            if (!file || !file.url) return '';
-            return file.url.startsWith('http') ? file.url : 'http://localhost:1337' + file.url;
+            return resolveImgUrl(file);
+          };
+
+          // ---- 详情页状态 ----
+          const selectedItem   = ref(null);
+          const detailOpen     = computed(() => selectedItem.value !== null);
+          const downloadingKey = ref(null);
+
+          const detailImages = computed(() => {
+            const imgs = selectedItem.value && selectedItem.value.Imge;
+            if (!Array.isArray(imgs)) return [];
+            return imgs.map((f) => ({
+              url: resolveImgUrl(f),
+              name: f.name || '',
+              ext: f.ext || '',
+              size: f.size || 0,
+              width: f.width || 0,
+              height: f.height || 0,
+              mime: f.mime || '',
+            }));
+          });
+
+          const detailFields = computed(() => {
+            const s = selectedItem.value || {};
+            return [
+              { label: '编号', value: s.Index },
+              { label: '字位', value: s.Character },
+              { label: '字种', value: s.Type },
+              { label: '语符', value: s.Symbol },
+              { label: '用法', value: s.Usage },
+              { label: '出处', value: s.Source },
+              { label: '时代', value: s.Era },
+            ];
+          });
+
+          const formatKB = (kb) => {
+            if (!kb) return '0 KB';
+            if (kb < 1024) return `${Math.round(kb)} KB`;
+            return `${(kb / 1024).toFixed(1)} MB`;
+          };
+
+          const openDetail = (item) => {
+            selectedItem.value = item;
+            document.body.style.overflow = 'hidden';
+          };
+          const closeDetail = () => {
+            selectedItem.value = null;
+            if (!viewerOpen.value) document.body.style.overflow = '';
+          };
+
+          // ---- 图片下载（uploads 公开，不加 Authorization 避免触发 preflight）----
+          const downloadImage = async (img, idx) => {
+            const key = `${selectedItem.value.Index}_${idx}`;
+            if (downloadingKey.value === key) return;
+            downloadingKey.value = key;
+            try {
+              const res = await fetch(img.url);
+              if (!res.ok) throw new Error(`HTTP ${res.status}`);
+              const blob = await res.blob();
+              const safeIndex = (selectedItem.value.Index || 'char').replace(/[^\w\-]+/g, '_');
+              const ext = img.ext || '.png';
+              const fallback = `${safeIndex}_${idx + 1}${ext}`;
+              const filename = img.name || fallback;
+              const objectUrl = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = objectUrl;
+              a.download = filename;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+            } catch (e) {
+              console.error('[下载失败]', e);
+              alert(`下载失败：${e.message}`);
+            } finally {
+              downloadingKey.value = null;
+            }
+          };
+
+          // ---- 全屏图片查看器 ----
+          const viewerOpen     = ref(false);
+          const viewerImages   = ref([]);
+          const viewerIndex    = ref(0);
+          const zoomScale      = ref(1);
+          const zoomTranslateX = ref(0);
+          const zoomTranslateY = ref(0);
+          const isDragging     = ref(false);
+          let dragStartX = 0, dragStartY = 0, dragOriginX = 0, dragOriginY = 0;
+
+          const resetViewer = () => {
+            zoomScale.value      = 1;
+            zoomTranslateX.value = 0;
+            zoomTranslateY.value = 0;
+            isDragging.value     = false;
+          };
+          const openViewer = (idx) => {
+            viewerImages.value = detailImages.value;
+            viewerIndex.value  = idx;
+            resetViewer();
+            viewerOpen.value   = true;
+          };
+          const closeViewer = () => {
+            viewerOpen.value = false;
+            if (!detailOpen.value) document.body.style.overflow = '';
+          };
+
+          const onViewerWheel = (e) => {
+            const delta  = -e.deltaY;
+            const factor = delta > 0 ? 1.1 : 1 / 1.1;
+            const newScale = Math.min(10, Math.max(0.2, zoomScale.value * factor));
+            const rect = e.currentTarget.getBoundingClientRect();
+            const cx = e.clientX - rect.left - rect.width  / 2;
+            const cy = e.clientY - rect.top  - rect.height / 2;
+            const ratio = newScale / zoomScale.value;
+            zoomTranslateX.value = cx - (cx - zoomTranslateX.value) * ratio;
+            zoomTranslateY.value = cy - (cy - zoomTranslateY.value) * ratio;
+            zoomScale.value = newScale;
+          };
+          const onViewerMouseDown = (e) => {
+            if (e.button !== 0) return;
+            isDragging.value = true;
+            dragStartX  = e.clientX;
+            dragStartY  = e.clientY;
+            dragOriginX = zoomTranslateX.value;
+            dragOriginY = zoomTranslateY.value;
+          };
+          const onViewerMouseMove = (e) => {
+            if (!isDragging.value) return;
+            zoomTranslateX.value = dragOriginX + (e.clientX - dragStartX);
+            zoomTranslateY.value = dragOriginY + (e.clientY - dragStartY);
+          };
+          const onViewerMouseUp = () => {
+            isDragging.value = false;
+          };
+
+          // ---- 全局 ESC：先关 viewer，再关 detail ----
+          const onKey = (e) => {
+            if (e.key !== 'Escape') return;
+            if (viewerOpen.value) closeViewer();
+            else if (detailOpen.value) closeDetail();
           };
 
           // ---- 构建 Strapi 查询参数 ----
-          const buildQuery = (page, extraFilters = {}) => {
+          const buildQuery = (page) => {
             const params = new URLSearchParams();
             params.append('pagination[page]', page);
             params.append('pagination[pageSize]', pageSize.value);
@@ -255,20 +799,19 @@
             if (searchSymbol.value.trim())
               params.append(`filters[$or][${orIdx++}][Symbol][$contains]`, searchSymbol.value.trim());
 
-            // 额外过滤（用于时代快筛）
-            for (const [key, val] of Object.entries(extraFilters)) {
-              params.append(key, val);
-            }
+            const rule = getEffectiveSortRule();
+            SORT_RULES[rule].forEach((s, i) => params.append(`sort[${i}]`, s));
+
             return params.toString();
           };
 
           // ---- 核心数据获取 ----
-          const fetchData = async (page = 1, extraFilters = {}) => {
+          const fetchData = async (page = 1) => {
             if (page < 1 || (totalPages.value > 0 && page > totalPages.value)) return;
             loading.value = true;
             error.value = null;
             try {
-              const query = buildQuery(page, extraFilters);
+              const query = buildQuery(page);
               const response = await fetch(`${API_BASE}/characters?${query}`, {
                 headers: { Authorization: `Bearer ${API_TOKEN}` },
               });
@@ -298,15 +841,14 @@
             searchType.value      = '';
             searchCharacter.value = '';
             searchSymbol.value    = '';
+            sortMode.value        = 'auto';
             fetchData(1);
           };
 
-          // ---- 时代快速筛选 ----
-          const quickFilterEra = (era) => {
-            searchType.value      = '';
-            searchCharacter.value = '';
-            searchSymbol.value    = '';
-            fetchData(1, { 'filters[Era][$contains]': era });
+          // ---- 切换排序模式 ----
+          const setSortMode = (mode) => {
+            sortMode.value = mode;
+            fetchData(1);
           };
 
           // ---- 分页页码范围（带省略号） ----
@@ -329,15 +871,31 @@
             return result;
           });
 
-          onMounted(() => fetchData(1));
+          onMounted(() => {
+            fetchData(1);
+            window.addEventListener('keydown', onKey);
+          });
+          onBeforeUnmount(() => {
+            window.removeEventListener('keydown', onKey);
+          });
 
           return {
+            // 视图切换
+            view, enterSearch,
             characters, loading, error,
             searchType, searchCharacter, searchSymbol,
             currentPage, pageSize, totalCount, totalPages, jumpPage,
-            eras,
-            getImageUrl, fetchData, doSearch, clearSearch, quickFilterEra,
+            sortMode, sortOptions, setSortMode,
+            getImageUrl, fetchData, doSearch, clearSearch,
             paginationRange,
+            // 详情页
+            selectedItem, detailOpen, detailImages, detailFields,
+            openDetail, closeDetail, downloadingKey, downloadImage, formatKB,
+            // 图片查看器
+            viewerOpen, viewerImages, viewerIndex,
+            zoomScale, zoomTranslateX, zoomTranslateY, isDragging,
+            openViewer, closeViewer, resetViewer,
+            onViewerWheel, onViewerMouseDown, onViewerMouseMove, onViewerMouseUp,
           };
         },
       }).mount('#app');

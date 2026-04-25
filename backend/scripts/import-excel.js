@@ -12,10 +12,11 @@ const path = require('path');
 const XLSX = require('xlsx');
 
 // ---- 配置区域 ----
-const EXCEL_PATH = path.resolve(
-  __dirname,
-  '../../frontend/示例数据-種々薬帳1.xlsx'
-);
+// 支持命令行传 Excel 路径：npm run import -- <path>
+const CLI_ARG = process.argv[2];
+const EXCEL_PATH = CLI_ARG
+  ? path.resolve(process.cwd(), CLI_ARG)
+  : path.resolve(__dirname, '../../frontend/示例数据-種々薬帳1.xlsx');
 const STRAPI_URL = process.env.STRAPI_URL || 'http://localhost:1337';
 const API_TOKEN  = process.env.STRAPI_TOKEN ||
   'c21a49ab9d05d68d493c0db6f7f8062e006ffec23ae71d9126041231f913c7ea42e991821e4ef3c4e26c33bd71c9a6bfb7fe834b6e4ebe80d36c81aa2f4ded1108e2b070e0fdf9630446d38fbe296d646e9963f0a485dbbb10619cab72978bbb4e6509883b1027f58a0f13930a1ad139b766b208b4d471473d3eac90be340b29';

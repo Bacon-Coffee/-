@@ -18,10 +18,14 @@ const os   = require('os');
 const { execSync } = require('child_process');
 
 // ---- 配置 ----
-const EXCEL_PATH = path.resolve(
-  __dirname,
-  '../../frontend/示例数据-種々薬帳1.xlsx'
-);
+// 支持命令行：npm run import-images -- <path> [--fresh]
+//   --fresh: 跳过媒体库按文件名复用，强制为每张图新上传（跨 Excel 防止同名图错误复用）
+const argv      = process.argv.slice(2);
+const FRESH     = argv.includes('--fresh');
+const CLI_PATH  = argv.find(a => !a.startsWith('--'));
+const EXCEL_PATH = CLI_PATH
+  ? path.resolve(process.cwd(), CLI_PATH)
+  : path.resolve(__dirname, '../../frontend/示例数据-種々薬帳1.xlsx');
 const STRAPI_URL = process.env.STRAPI_URL   || 'http://localhost:1337';
 const API_TOKEN  = process.env.STRAPI_TOKEN ||
   'c21a49ab9d05d68d493c0db6f7f8062e006ffec23ae71d9126041231f913c7ea42e991821e4ef3c4e26c33bd71c9a6bfb7fe834b6e4ebe80d36c81aa2f4ded1108e2b070e0fdf9630446d38fbe296d646e9963f0a485dbbb10619cab72978bbb4e6509883b1027f58a0f13930a1ad139b766b208b4d471473d3eac90be340b29';
@@ -49,22 +53,86 @@ function parseDrawingRels(relsPath) {
   return ridToFile;
 }
 
-function parseDrawing(drawingPath, ridToFile) {
+// 解析 <xdr:from> / <xdr:to> 块中的 row + rowOff（EMU）
+function parseFromTo(xml, tag) {
+  const m = new RegExp(`<xdr:${tag}>([\\s\\S]*?)<\\/xdr:${tag}>`).exec(xml);
+  if (!m) return null;
+  const rowM    = /<xdr:row>(\d+)<\/xdr:row>/.exec(m[1]);
+  const rowOffM = /<xdr:rowOff>(-?\d+)<\/xdr:rowOff>/.exec(m[1]);
+  if (!rowM) return null;
+  return {
+    row:    parseInt(rowM[1]),               // 0-indexed
+    rowOff: rowOffM ? parseInt(rowOffM[1]) : 0,
+  };
+}
+
+// 按覆盖面积选定图片归属的 sheet row (1-indexed)
+function resolveAnchorRow(from, to, rowHeightEmu) {
+  // 同行直接返回（绝大多数情况）
+  if (from.row === to.row) return from.row + 1;
+
+  const coverage = {};
+  for (let r = from.row; r <= to.row; r++) {
+    const sheetRow = r + 1;
+    const h        = rowHeightEmu(sheetRow);
+    const start    = r === from.row ? from.rowOff : 0;
+    let   end      = r === to.row   ? to.rowOff   : h;
+    if (end > h) end = h;
+    coverage[sheetRow] = Math.max(0, end - start);
+  }
+  let bestRow = from.row + 1, bestVal = -1;
+  for (const [r, v] of Object.entries(coverage)) {
+    if (v > bestVal) { bestVal = v; bestRow = parseInt(r); }
+  }
+  return bestRow;
+}
+
+// 从 oneCellAnchor 的 from + ext 推导虚拟 to
+function extToVirtualTo(from, extCy, rowHeightEmu) {
+  let row = from.row;
+  let remain = from.rowOff + extCy;
+  let h = rowHeightEmu(row + 1);
+  while (remain > h) { remain -= h; row += 1; h = rowHeightEmu(row + 1); }
+  return { row, rowOff: remain };
+}
+
+function parseDrawing(drawingPath, ridToFile, rowHeightEmu) {
   const xml = fs.readFileSync(drawingPath, 'utf8');
   const rowToImages = {};
-  const anchorRe = /<xdr:oneCellAnchor>([\s\S]*?)<\/xdr:oneCellAnchor>/g;
-  let anchor;
-  while ((anchor = anchorRe.exec(xml)) !== null) {
-    const block      = anchor[1];
-    const rowMatch   = /<xdr:row>(\d+)<\/xdr:row>/.exec(block);
+  const stats = { oneCellAnchor: 0, twoCellAnchor: 0, absoluteAnchor: 0, skipped: 0 };
+
+  // 匹配三种锚点；\1 回引保证类型匹配
+  const anchorRe =
+    /<xdr:(oneCellAnchor|twoCellAnchor|absoluteAnchor)(?:\s[^>]*)?>([\s\S]*?)<\/xdr:\1>/g;
+  let m;
+  while ((m = anchorRe.exec(xml)) !== null) {
+    const type  = m[1];
+    const block = m[2];
+
     const embedMatch = /r:embed="(rId\d+)"/.exec(block);
-    if (!rowMatch || !embedMatch) continue;
-    const row = parseInt(rowMatch[1]) + 1;  // 0-indexed → 1-indexed
+    if (!embedMatch) { stats.skipped++; continue; }
     const filename = ridToFile[embedMatch[1]];
-    if (!filename) continue;
-    (rowToImages[row] = rowToImages[row] || []).push(filename);
+    if (!filename) { stats.skipped++; continue; }
+
+    const from = parseFromTo(block, 'from');
+    if (!from) { stats.skipped++; continue; }
+
+    let to;
+    if (type === 'twoCellAnchor') {
+      to = parseFromTo(block, 'to');
+      if (!to) { stats.skipped++; continue; }
+    } else {
+      // oneCellAnchor / absoluteAnchor：由 ext.cy 推导
+      const extM = /<xdr:ext\s+cx="\d+"\s+cy="(\d+)"/.exec(block);
+      const cy   = extM ? parseInt(extM[1]) : 0;
+      to = extToVirtualTo(from, cy, rowHeightEmu);
+    }
+
+    const sheetRow = resolveAnchorRow(from, to, rowHeightEmu);
+    (rowToImages[sheetRow] = rowToImages[sheetRow] || []).push(filename);
+    stats[type]++;
   }
-  return rowToImages;
+  return { rowToImages, stats };
 }
 
 function parseSheetIndex(sheetPath, ssPath) {
@@ -75,17 +143,39 @@ function parseSheetIndex(sheetPath, ssPath) {
   let si;
   while ((si = siRe.exec(ssXml)) !== null) strings.push(si[1]);
 
-  // 读 sheet A列
   const sheetXml = fs.readFileSync(sheetPath, 'utf8');
+
+  // sheetFormatPr defaultRowHeight（单位: point，1pt = 12700 EMU；缺省 15）
+  let defaultRowHeight = 15;
+  const fmt = /<sheetFormatPr[^>]*defaultRowHeight="([\d.]+)"/.exec(sheetXml);
+  if (fmt) defaultRowHeight = parseFloat(fmt[1]);
+
+  // 逐行解析：A 列 (Index) + ht 属性 (行高 point)
   const rowToIndex = {};
-  const rowRe = /<row r="(\d+)"[^>]*>([\s\S]*?)<\/row>/g;
+  const rowHeights = {};   // rowNum (1-based) -> point
+  const rowRe = /<row r="(\d+)"([^>]*)>([\s\S]*?)<\/row>/g;
   let rowEl;
   while ((rowEl = rowRe.exec(sheetXml)) !== null) {
     const rowNum = parseInt(rowEl[1]);
-    const cellMatch = /<c r="A\d+" [^>]*t="s"[^>]*><v>(\d+)<\/v><\/c>/.exec(rowEl[2]);
+    const attrs  = rowEl[2];
+    const body   = rowEl[3];
+
+    const htMatch = /\bht="([\d.]+)"/.exec(attrs);
+    if (htMatch) rowHeights[rowNum] = parseFloat(htMatch[1]);
+
+    const cellMatch = /<c r="A\d+" [^>]*t="s"[^>]*><v>(\d+)<\/v><\/c>/.exec(body);
     if (cellMatch) rowToIndex[rowNum] = strings[parseInt(cellMatch[1])] || '';
   }
-  return rowToIndex;
+  return { rowToIndex, rowHeights, defaultRowHeight };
+}
+
+// 行高查询工具：返回指定行的高度 (EMU)
+function makeRowHeightEmu(rowHeights, defaultRowHeight) {
+  const DEFAULT_EMU = defaultRowHeight * 12700;
+  return (rowNum) => {
+    const pt = rowHeights[rowNum];
+    return pt !== undefined ? pt * 12700 : DEFAULT_EMU;
+  };
 }
 
 function buildIndexToImages(rowToImages, rowToIndex) {
@@ -93,7 +183,10 @@ function buildIndexToImages(rowToImages, rowToIndex) {
   for (const [row, images] of Object.entries(rowToImages)) {
     const idx = rowToIndex[parseInt(row)];
     if (!idx) continue;
-    (result[idx] = result[idx] || []).push(...images);
+    const bucket = (result[idx] = result[idx] || []);
+    for (const f of images) {
+      if (!bucket.includes(f)) bucket.push(f);   // 去重：同锚点重复引用的图片只保留一次
+    }
   }
   return result;
 }
@@ -214,21 +307,28 @@ async function main() {
   const ssPath    = path.join(tmpDir, 'xl/sharedStrings.xml');
 
   const ridToFile     = parseDrawingRels(relsPath);
-  const rowToImages   = parseDrawing(drawPath, ridToFile);
-  const rowToIndex    = parseSheetIndex(sheetPath, ssPath);
+  const { rowToIndex, rowHeights, defaultRowHeight } = parseSheetIndex(sheetPath, ssPath);
+  const rowHeightEmu  = makeRowHeightEmu(rowHeights, defaultRowHeight);
+  const { rowToImages, stats } = parseDrawing(drawPath, ridToFile, rowHeightEmu);
   const indexToImages = buildIndexToImages(rowToImages, rowToIndex);
 
   const totalRecords = Object.keys(indexToImages).length;
   const totalImgs    = Object.values(indexToImages).reduce((s, a) => s + a.length, 0);
+  console.log(`  锚点解析: oneCell=${stats.oneCellAnchor}, twoCell=${stats.twoCellAnchor}, absolute=${stats.absoluteAnchor}, skipped=${stats.skipped}`);
   console.log(`  Excel 中有图片的记录: ${totalRecords} 条，共 ${totalImgs} 张\n`);
 
   // B. 读取媒体库（已上传的文件）
   let nameToId;
-  try {
-    nameToId = await fetchMediaLibrary();
-  } catch (e) {
-    console.error(`读取媒体库失败: ${e.message}\n请确认 Strapi 已启动。`);
-    process.exit(1);
+  if (FRESH) {
+    console.log('--fresh 已启用：跳过媒体库复用，所有图片将作为新文件上传');
+    nameToId = {};
+  } else {
+    try {
+      nameToId = await fetchMediaLibrary();
+    } catch (e) {
+      console.error(`读取媒体库失败: ${e.message}\n请确认 Strapi 已启动。`);
+      process.exit(1);
+    }
   }
 
   // C. 获取字符记录
