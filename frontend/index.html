@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-Hant">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>日本汉文写本汉方文献用字数据库</title>
+    <title>日本漢文寫本漢方文獻用字數據庫</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -29,7 +29,7 @@
         padding: 4px;
       }
 
-      /* ==================== 首页（古籍典藏感封面） ==================== */
+      /* ==================== 首頁（古籍典藏感封面） ==================== */
       .homepage {
         position: relative;
         min-height: 100vh;
@@ -88,7 +88,7 @@
         line-height: 1;
       }
 
-      /* 竖排标题 */
+      /* 豎排標題 */
       .title-vertical {
         writing-mode: vertical-rl;
         font-family: "FZSuperCJK", "楷体", "STKaiti", serif;
@@ -105,7 +105,7 @@
         animation-delay: calc(0.7s + var(--i) * 65ms);
       }
 
-      /* 副标题 */
+      /* 副標題 */
       .subtitle {
         display: inline-flex;
         align-items: center;
@@ -125,7 +125,7 @@
         background-color: #a8a29e;
       }
 
-      /* 进入按钮 */
+      /* 進入按鈕 */
       .enter-btn {
         border: 2px solid #7f1d1d;
         background-color: transparent;
@@ -157,7 +157,7 @@
         animation-delay: 2.25s;
       }
 
-      /* 底部装饰 */
+      /* 底部裝飾 */
       .home-footer {
         position: absolute;
         bottom: 24px;
@@ -182,7 +182,7 @@
         margin: 0;
       }
 
-      /* ---- 入场动画 ---- */
+      /* ---- 入場動畫 ---- */
       @keyframes seal-stamp {
         0%   { opacity: 0;   transform: rotate(-3deg) scale(0.4); }
         60%  { opacity: 1;   transform: rotate(-3deg) scale(1.12); }
@@ -197,7 +197,7 @@
         to   { opacity: 1; transform: translateY(0); }
       }
 
-      /* ---- 视图切换过渡 ---- */
+      /* ---- 視圖切換過渡 ---- */
       .fade-slide-enter-active,
       .fade-slide-leave-active {
         transition: opacity 0.25s ease, transform 0.25s ease;
@@ -216,19 +216,19 @@
     <div id="app">
       <transition name="fade-slide" mode="out-in">
 
-      <!-- ============ 首页（古籍典藏感封面） ============ -->
+      <!-- ============ 首頁（古籍典藏感封面） ============ -->
       <section v-if="view === 'home'" key="home" class="homepage">
         <div class="paper-noise"></div>
 
         <div class="home-content">
           <div class="hero-row">
-            <!-- 朱印（TODO: 后期可替换为甲方提供的正式 logo/印章） -->
+            <!-- 朱印（TODO: 後期可替換爲甲方提供的正式 logo/印章） -->
             <div class="seal" aria-hidden="true">
               <span>漢</span><span>文</span>
               <span>寫</span><span>本</span>
             </div>
 
-            <!-- 竖排楷体大标题 -->
+            <!-- 豎排楷體大標題 -->
             <h1 class="title-vertical">
               <span style="--i: 0">日</span>
               <span style="--i: 1">本</span>
@@ -248,34 +248,34 @@
             </h1>
           </div>
 
-          <!-- 副标题（TODO: 待甲方提供正式简介后替换） -->
+          <!-- 副標題（TODO: 待甲方提供正式簡介後替換） -->
           <div class="subtitle">
             <span>日本漢文寫本漢方文獻中所見用字之系統輯錄與檢索</span>
           </div>
 
-          <!-- 进入按钮 -->
+          <!-- 進入按鈕 -->
           <button class="enter-btn" @click="enterSearch">進　入　檢　索</button>
           <div class="enter-hint">點 擊 進 入 數 據 檢 索</div>
         </div>
 
         <footer class="home-footer">
           <div class="double-line"></div>
-          <p>Version 0.1.0 · 日本汉文写本汉方文献用字数据库</p>
+          <p>Version 0.1.0 · 日本漢文寫本漢方文獻用字數據庫</p>
         </footer>
       </section>
 
-      <!-- ============ 检索页（原有功能） ============ -->
+      <!-- ============ 檢索頁（原有功能） ============ -->
       <div v-else key="search" class="container mx-auto px-4 py-8 max-w-7xl">
       <header class="text-center mb-10">
         <h1 class="text-4xl font-bold mb-2 text-red-900 tracking-widest">
-          ✒️ 日本汉文写本汉方文献用字数据库
+          ✒️ 日本漢文寫本漢方文獻用字數據庫
         </h1>
-        <p class="text-stone-500 text-sm mb-8">共收录 <strong class="text-stone-700">{{ totalCount }}</strong> 条记录</p>
+        <p class="text-stone-500 text-sm mb-8">共收錄 <strong class="text-stone-700">{{ totalCount }}</strong> 條記錄</p>
 
-        <!-- 三栏检索框 -->
+        <!-- 三欄檢索框 -->
         <div class="max-w-3xl mx-auto grid grid-cols-3 gap-3 mb-4">
           <div class="flex flex-col text-left">
-            <label class="text-xs text-stone-500 mb-1 pl-1">字种</label>
+            <label class="text-xs text-stone-500 mb-1 pl-1">字種</label>
             <input
               v-model="searchType"
               type="text"
@@ -289,13 +289,13 @@
             <input
               v-model="searchCharacter"
               type="text"
-              placeholder="例：马"
+              placeholder="例：馬"
               class="p-3 text-base bg-white border-2 border-red-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-700 placeholder-stone-400"
               @keyup.enter="doSearch"
             />
           </div>
           <div class="flex flex-col text-left">
-            <label class="text-xs text-stone-500 mb-1 pl-1">语符</label>
+            <label class="text-xs text-stone-500 mb-1 pl-1">語符</label>
             <input
               v-model="searchSymbol"
               type="text"
@@ -311,7 +311,7 @@
             @click="doSearch"
             class="bg-red-900 text-white px-10 py-3 text-lg font-bold rounded-lg hover:bg-red-800 transition"
           >
-            检索
+            檢索
           </button>
           <button
             @click="clearSearch"
@@ -337,32 +337,32 @@
         </div>
       </header>
 
-      <!-- 加载中 -->
+      <!-- 加載中 -->
       <div v-if="loading" class="flex justify-center items-center py-20">
         <div class="animate-spin rounded-full h-12 w-12 border-4 border-stone-300 border-t-red-900"></div>
-        <span class="ml-4 text-xl text-stone-500">正在翻阅墨迹...</span>
+        <span class="ml-4 text-xl text-stone-500">正在翻閱墨跡...</span>
       </div>
 
-      <!-- 错误提示 -->
+      <!-- 錯誤提示 -->
       <div v-else-if="error" class="text-center py-10 text-red-600 text-lg">
         {{ error }}
       </div>
 
       <template v-else>
-        <!-- 分页统计 -->
+        <!-- 分頁統計 -->
         <div class="flex justify-between items-center mb-4 text-sm text-stone-500">
           <span>
-            找到 <strong class="text-stone-700">{{ totalCount }}</strong> 条记录
+            找到 <strong class="text-stone-700">{{ totalCount }}</strong> 條記錄
           </span>
-          <span>第 {{ currentPage }} / {{ totalPages }} 页（每页 {{ pageSize }} 条）</span>
+          <span>第 {{ currentPage }} / {{ totalPages }} 頁（每頁 {{ pageSize }} 條）</span>
         </div>
 
-        <!-- 无结果 -->
+        <!-- 無結果 -->
         <div v-if="characters.length === 0" class="text-center py-20 text-stone-400 text-xl">
-          未找到相关记录
+          未找到相關記錄
         </div>
 
-        <!-- 字符卡片网格 -->
+        <!-- 字符卡片網格 -->
         <div v-else class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
           <div
             v-for="item in characters"
@@ -378,7 +378,7 @@
                 class="w-full h-full object-contain object-center filter group-hover:brightness-95"
               />
               <div v-else class="text-stone-300 text-sm flex flex-col items-center">
-                <span>🚫</span><span>暂无图片</span>
+                <span>🚫</span><span>暫無圖片</span>
               </div>
               <span class="absolute top-1 right-1 text-[10px] text-stone-400 bg-stone-100 px-1 rounded">{{item.Index}}</span>
             </div>
@@ -386,23 +386,23 @@
             <div class="p-3 text-center space-y-2">
               <div class="text-3xl font-bold text-stone-800">{{item.Character}}</div>
               <div class="grid grid-cols-2 gap-1 text-xs text-stone-500 text-left bg-stone-50 p-2 rounded">
-                <div><span class="font-bold">字种:</span> {{item.Type || '-'}}</div>
-                <div><span class="font-bold">语符:</span> {{item.Symbol || '-'}}</div>
-                <div><span class="font-bold">时代:</span> {{item.Era || '-'}}</div>
-                <div><span class="font-bold">出处:</span> {{item.Source || '-'}}</div>
+                <div><span class="font-bold">字種:</span> {{item.Type || '-'}}</div>
+                <div><span class="font-bold">語符:</span> {{item.Symbol || '-'}}</div>
+                <div><span class="font-bold">時代:</span> {{item.Era || '-'}}</div>
+                <div><span class="font-bold">出處:</span> {{item.Source || '-'}}</div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- 分页控件 -->
+        <!-- 分頁控件 -->
         <div v-if="totalPages > 1" class="mt-10 flex justify-center items-center gap-2 flex-wrap">
           <button
             @click="fetchData(currentPage - 1)"
             :disabled="currentPage <= 1"
             class="px-4 py-2 rounded border border-stone-300 text-stone-600 hover:bg-stone-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
           >
-            ← 上一页
+            ← 上一頁
           </button>
 
           <template v-for="page in paginationRange" :key="String(page)">
@@ -426,7 +426,7 @@
             :disabled="currentPage >= totalPages"
             class="px-4 py-2 rounded border border-stone-300 text-stone-600 hover:bg-stone-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
           >
-            下一页 →
+            下一頁 →
           </button>
 
           <div class="flex items-center gap-1 ml-4">
@@ -439,13 +439,13 @@
               @keyup.enter="fetchData(jumpPage)"
               class="w-14 px-2 py-2 border border-stone-300 rounded text-center text-sm"
             />
-            <span class="text-sm text-stone-500">页</span>
-            <button @click="fetchData(jumpPage)" class="text-sm text-red-800 hover:underline ml-1">跳转</button>
+            <span class="text-sm text-stone-500">頁</span>
+            <button @click="fetchData(jumpPage)" class="text-sm text-red-800 hover:underline ml-1">跳轉</button>
           </div>
         </div>
       </template>
 
-      <!-- ============ 详情模态框 ============ -->
+      <!-- ============ 詳情模態框 ============ -->
       <transition
         enter-active-class="transition duration-200 ease-out"
         enter-from-class="opacity-0"
@@ -460,7 +460,7 @@
           <div
             class="bg-[#fdfaf2] border-2 border-red-900 rounded-lg shadow-2xl w-full max-w-5xl max-h-[92vh] overflow-hidden flex flex-col"
           >
-            <!-- 头部 -->
+            <!-- 頭部 -->
             <div class="flex items-center justify-between px-6 py-3 border-b border-stone-300 bg-white">
               <div class="flex items-baseline gap-4">
                 <span class="text-xs text-stone-500">{{ selectedItem.Index }}</span>
@@ -468,22 +468,22 @@
               </div>
               <button
                 @click="closeDetail"
-                aria-label="关闭"
+                aria-label="關閉"
                 class="text-stone-400 hover:text-red-900 text-2xl leading-none w-8 h-8 flex items-center justify-center rounded hover:bg-stone-100"
               >
                 ✕
               </button>
             </div>
 
-            <!-- 主体 -->
+            <!-- 主體 -->
             <div class="flex-1 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-              <!-- 左：图片列表 -->
+              <!-- 左：圖片列表 -->
               <div class="space-y-4">
                 <div
                   v-if="detailImages.length === 0"
                   class="aspect-square bg-white border border-stone-300 rounded flex items-center justify-center text-stone-400 text-sm"
                 >
-                  🚫 暂无图片
+                  🚫 暫無圖片
                 </div>
                 <div
                   v-for="(img, idx) in detailImages"
@@ -503,7 +503,7 @@
                       :disabled="downloadingKey === selectedItem.Index + '_' + idx"
                       class="shrink-0 px-3 py-1 bg-red-900 text-white rounded hover:bg-red-800 disabled:opacity-50 transition text-xs"
                     >
-                      {{ downloadingKey === selectedItem.Index + '_' + idx ? '下载中…' : '⬇ 下载' }}
+                      {{ downloadingKey === selectedItem.Index + '_' + idx ? '下載中…' : '⬇ 下載' }}
                     </button>
                   </div>
                 </div>
@@ -527,7 +527,7 @@
         </div>
       </transition>
 
-      <!-- ============ 全屏图片查看器 ============ -->
+      <!-- ============ 全屏圖片查看器 ============ -->
       <transition
         enter-active-class="transition duration-150 ease-out"
         enter-from-class="opacity-0"
@@ -544,14 +544,14 @@
           @mouseleave="onViewerMouseUp"
           @dblclick="resetViewer"
         >
-          <!-- 顶部工具条 -->
+          <!-- 頂部工具條 -->
           <div
             class="absolute top-0 left-0 right-0 h-12 flex items-center justify-between px-4 bg-gradient-to-b from-black/60 to-transparent text-white/80 text-sm z-10"
           >
             <span>{{ Math.round(zoomScale * 100) }}%</span>
             <div class="flex gap-2">
-              <button @click.stop="resetViewer" class="px-3 py-1 hover:bg-white/10 rounded">复位</button>
-              <button @click.stop="closeViewer" class="px-3 py-1 hover:bg-white/10 rounded">✕ 关闭</button>
+              <button @click.stop="resetViewer" class="px-3 py-1 hover:bg-white/10 rounded">復位</button>
+              <button @click.stop="closeViewer" class="px-3 py-1 hover:bg-white/10 rounded">✕ 關閉</button>
             </div>
           </div>
 
@@ -569,12 +569,12 @@
 
           <!-- 底部提示 -->
           <div class="absolute bottom-4 left-0 right-0 text-center text-white/50 text-xs">
-            滚轮缩放 · 拖动平移 · 双击复位 · ESC 关闭
+            滾輪縮放 · 拖動平移 · 雙擊復位 · ESC 關閉
           </div>
         </div>
       </transition>
       </div>
-      <!-- /检索页 -->
+      <!-- /檢索頁 -->
 
       </transition>
     </div>
@@ -584,21 +584,21 @@
 
       createApp({
         setup() {
-          // ---- 视图状态：'home' = 首页封面，'search' = 检索功能 ----
+          // ---- 視圖狀態：'home' = 首頁封面，'search' = 檢索功能 ----
           const view = ref('home');
           const enterSearch = () => { view.value = 'search'; };
 
-          // ---- 状态 ----
+          // ---- 狀態 ----
           const characters  = ref([]);
           const loading     = ref(true);
           const error       = ref(null);
 
-          // 三个独立检索字段
-          const searchType      = ref('');  // 字种
+          // 三個獨立檢索字段
+          const searchType      = ref('');  // 字種
           const searchCharacter = ref('');  // 字位
-          const searchSymbol    = ref('');  // 语符
+          const searchSymbol    = ref('');  // 語符
 
-          // 分页状态
+          // 分頁狀態
           const currentPage = ref(1);
           const pageSize    = ref(18);
           const totalCount  = ref(0);
@@ -609,10 +609,10 @@
           const sortMode = ref('auto');
 
           const sortOptions = [
-            { value: 'auto',      label: '自动' },
-            { value: 'character', label: '按字位规则' },
-            { value: 'type',      label: '按字种规则' },
-            { value: 'symbol',    label: '按语符规则' },
+            { value: 'auto',      label: '自動' },
+            { value: 'character', label: '按字位規則' },
+            { value: 'type',      label: '按字種規則' },
+            { value: 'symbol',    label: '按語符規則' },
           ];
 
           const SORT_RULES = {
@@ -633,7 +633,7 @@
           const API_TOKEN = 'c21a49ab9d05d68d493c0db6f7f8062e006ffec23ae71d9126041231f913c7ea42e991821e4ef3c4e26c33bd71c9a6bfb7fe834b6e4ebe80d36c81aa2f4ded1108e2b070e0fdf9630446d38fbe296d646e9963f0a485dbbb10619cab72978bbb4e6509883b1027f58a0f13930a1ad139b766b208b4d471473d3eac90be340b29';
           const API_BASE  = 'http://localhost:1337/api';
 
-          // ---- 图片 URL 解析 ----
+          // ---- 圖片 URL 解析 ----
           const MEDIA_BASE = 'http://localhost:1337';
           const resolveImgUrl = (file) => {
             if (!file || !file.url) return '';
@@ -645,7 +645,7 @@
             return resolveImgUrl(file);
           };
 
-          // ---- 详情页状态 ----
+          // ---- 詳情頁狀態 ----
           const selectedItem   = ref(null);
           const detailOpen     = computed(() => selectedItem.value !== null);
           const downloadingKey = ref(null);
@@ -667,13 +667,13 @@
           const detailFields = computed(() => {
             const s = selectedItem.value || {};
             return [
-              { label: '编号', value: s.Index },
+              { label: '編號', value: s.Index },
               { label: '字位', value: s.Character },
-              { label: '字种', value: s.Type },
-              { label: '语符', value: s.Symbol },
+              { label: '字種', value: s.Type },
+              { label: '語符', value: s.Symbol },
               { label: '用法', value: s.Usage },
-              { label: '出处', value: s.Source },
-              { label: '时代', value: s.Era },
+              { label: '出處', value: s.Source },
+              { label: '時代', value: s.Era },
             ];
           });
 
@@ -692,7 +692,7 @@
             if (!viewerOpen.value) document.body.style.overflow = '';
           };
 
-          // ---- 图片下载（uploads 公开，不加 Authorization 避免触发 preflight）----
+          // ---- 圖片下載（uploads 公開，不加 Authorization 避免觸發 preflight）----
           const downloadImage = async (img, idx) => {
             const key = `${selectedItem.value.Index}_${idx}`;
             if (downloadingKey.value === key) return;
@@ -714,14 +714,14 @@
               document.body.removeChild(a);
               setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
             } catch (e) {
-              console.error('[下载失败]', e);
-              alert(`下载失败：${e.message}`);
+              console.error('[下載失敗]', e);
+              alert(`下載失敗：${e.message}`);
             } finally {
               downloadingKey.value = null;
             }
           };
 
-          // ---- 全屏图片查看器 ----
+          // ---- 全屏圖片查看器 ----
           const viewerOpen     = ref(false);
           const viewerImages   = ref([]);
           const viewerIndex    = ref(0);
@@ -777,14 +777,14 @@
             isDragging.value = false;
           };
 
-          // ---- 全局 ESC：先关 viewer，再关 detail ----
+          // ---- 全局 ESC：先關 viewer，再關 detail ----
           const onKey = (e) => {
             if (e.key !== 'Escape') return;
             if (viewerOpen.value) closeViewer();
             else if (detailOpen.value) closeDetail();
           };
 
-          // ---- 构建 Strapi 查询参数 ----
+          // ---- 構建 Strapi 查詢參數 ----
           const buildQuery = (page) => {
             const params = new URLSearchParams();
             params.append('pagination[page]', page);
@@ -805,7 +805,7 @@
             return params.toString();
           };
 
-          // ---- 核心数据获取 ----
+          // ---- 核心數據獲取 ----
           const fetchData = async (page = 1) => {
             if (page < 1 || (totalPages.value > 0 && page > totalPages.value)) return;
             loading.value = true;
@@ -824,19 +824,19 @@
               totalPages.value  = pg.pageCount || 1;
               jumpPage.value    = currentPage.value;
             } catch (e) {
-              error.value = `加载失败：${e.message}。请确认 Strapi 已启动（http://localhost:1337）`;
+              error.value = `加載失敗：${e.message}。請確認 Strapi 已啓動（http://localhost:1337）`;
               console.error(e);
             } finally {
               loading.value = false;
             }
           };
 
-          // ---- 点击"检索"按钮 ----
+          // ---- 點擊"檢索"按鈕 ----
           const doSearch = () => {
             fetchData(1);
           };
 
-          // ---- 清空检索框 ----
+          // ---- 清空檢索框 ----
           const clearSearch = () => {
             searchType.value      = '';
             searchCharacter.value = '';
@@ -845,13 +845,13 @@
             fetchData(1);
           };
 
-          // ---- 切换排序模式 ----
+          // ---- 切換排序模式 ----
           const setSortMode = (mode) => {
             sortMode.value = mode;
             fetchData(1);
           };
 
-          // ---- 分页页码范围（带省略号） ----
+          // ---- 分頁頁碼範圍（帶省略號） ----
           const paginationRange = computed(() => {
             const total   = totalPages.value;
             const current = currentPage.value;
@@ -880,7 +880,7 @@
           });
 
           return {
-            // 视图切换
+            // 視圖切換
             view, enterSearch,
             characters, loading, error,
             searchType, searchCharacter, searchSymbol,
@@ -888,10 +888,10 @@
             sortMode, sortOptions, setSortMode,
             getImageUrl, fetchData, doSearch, clearSearch,
             paginationRange,
-            // 详情页
+            // 詳情頁
             selectedItem, detailOpen, detailImages, detailFields,
             openDetail, closeDetail, downloadingKey, downloadImage, formatKB,
-            // 图片查看器
+            // 圖片查看器
             viewerOpen, viewerImages, viewerIndex,
             zoomScale, zoomTranslateX, zoomTranslateY, isDragging,
             openViewer, closeViewer, resetViewer,
