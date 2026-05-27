@@ -46,6 +46,12 @@
     },
     "Usage": {
       "type": "string"
+    },
+    "SearchIndex": {
+      "type": "string"
+    },
+    "Note": {
+      "type": "string"
     }
   }
 }

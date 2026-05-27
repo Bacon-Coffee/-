@@ -497,7 +497,9 @@ export interface ApiCharacterCharacter extends Struct.CollectionTypeSchema {
       'api::character.character'
     > &
       Schema.Attribute.Private;
+    Note: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
+    SearchIndex: Schema.Attribute.String;
     Source: Schema.Attribute.String;
     Symbol: Schema.Attribute.String;
     Type: Schema.Attribute.String & Schema.Attribute.Required;
