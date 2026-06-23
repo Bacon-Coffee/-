@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>日本漢文寫本漢方文獻用字數據庫</title>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       @font-face {
@@ -34,14 +34,21 @@
         position: relative;
         min-height: 100vh;
         display: flex;
+        flex-direction: column;
+        background: radial-gradient(ellipse at top center, #fdfaf2 0%, #f0e6cc 100%);
+      }
+      /* 首屏 hero：保持整屏居中 */
+      .hero-screen {
+        position: relative;
+        min-height: 100vh;
+        display: flex;
         align-items: center;
         justify-content: center;
-        overflow: hidden;
-        background: radial-gradient(ellipse at center, #fdfaf2 0%, #f0e6cc 100%);
       }
       .paper-noise {
-        position: absolute;
+        position: fixed;
         inset: 0;
+        z-index: 0;
         pointer-events: none;
         opacity: 0.06;
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -157,16 +164,12 @@
         animation-delay: 2.25s;
       }
 
-      /* 底部裝飾 */
+      /* 底部裝飾（長頁最底，正常文檔流） */
       .home-footer {
-        position: absolute;
-        bottom: 24px;
-        left: 0;
-        right: 0;
+        position: relative;
+        z-index: 1;
         text-align: center;
-        opacity: 0;
-        animation: fade-in-up 0.6s ease-out forwards;
-        animation-delay: 2.4s;
+        padding: 2.25rem 1rem 3rem;
       }
       .double-line {
         width: 220px;
@@ -182,6 +185,174 @@
         margin: 0;
       }
 
+      /* ---- 滾動提示（hero 底部，邀請向下） ---- */
+      .scroll-cue {
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #a8a29e;
+        font-family: inherit;
+        opacity: 0;
+        animation: fade-in-up 0.6s ease-out forwards;
+        animation-delay: 2.6s;
+      }
+      .scroll-cue span {
+        font-size: 12px;
+        letter-spacing: 0.35em;
+        padding-left: 0.35em;
+      }
+      .scroll-cue .arrow {
+        font-size: 16px;
+        line-height: 1;
+        color: #7f1d1d;
+        animation: bob 1.8s ease-in-out infinite;
+      }
+      .scroll-cue:hover { color: #7f1d1d; }
+
+      /* ==================== 編纂者題名（開發人員題跋） ==================== */
+      .colophon {
+        position: relative;
+        z-index: 1;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 5.5rem 2rem 2.5rem;
+        width: 100%;
+      }
+      .colophon-head {
+        text-align: center;
+        margin-bottom: 3rem;
+      }
+      .colophon-seal {
+        display: inline-grid;
+        grid-template-columns: 1fr;
+        place-items: center;
+        width: 52px;
+        height: 52px;
+        margin: 0 auto 1.1rem;
+        background-color: #7f1d1d;
+        color: #fdfaf2;
+        font-size: 13px;
+        font-weight: bold;
+        line-height: 1.05;
+        font-family: "FZSuperCJK", "STKaiti", "楷体", serif;
+        transform: rotate(-3deg);
+        filter: contrast(1.08) brightness(0.96);
+        box-shadow: 0 2px 8px rgba(127, 29, 29, 0.25);
+      }
+      .colophon-title {
+        font-family: "FZSuperCJK", "楷体", "STKaiti", serif;
+        font-size: clamp(20px, 2.6vh, 28px);
+        font-weight: bold;
+        color: #7f1d1d;
+        letter-spacing: 0.3em;
+        padding-left: 0.3em;
+        margin: 0 0 0.9rem;
+      }
+      .colophon-sub {
+        position: relative;
+        display: inline-block;
+        font-size: 13px;
+        color: #57534e;
+        letter-spacing: 0.18em;
+        padding: 0.85rem 1.5rem 0;
+        margin: 0;
+        border-top: 1px solid #a8a29e;
+        border-bottom: 1px solid #a8a29e;
+        padding-bottom: 0.85rem;
+      }
+
+      .colophon-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+        gap: 1.75rem;
+      }
+      .dev-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        background-color: #fff;
+        border: 1px solid #a8a29e;
+        border-radius: 6px;
+        padding: 1.75rem 1.25rem 1.5rem;
+        box-shadow: 0 1px 3px rgba(120, 113, 108, 0.12);
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+      }
+      .dev-card:hover {
+        transform: translateY(-4px);
+        border-color: #7f1d1d;
+        box-shadow: 0 10px 22px -6px rgba(127, 29, 29, 0.18);
+      }
+      .dev-seal {
+        width: 56px;
+        height: 56px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #7f1d1d;
+        color: #fdfaf2;
+        font-size: 28px;
+        font-weight: bold;
+        font-family: "FZSuperCJK", "STKaiti", "楷体", serif;
+        transform: rotate(-3deg);
+        filter: contrast(1.08) brightness(0.96);
+        box-shadow: 0 2px 8px rgba(127, 29, 29, 0.25);
+        margin-bottom: 1.1rem;
+      }
+      .dev-name {
+        writing-mode: vertical-rl;
+        font-family: "FZSuperCJK", "楷体", "STKaiti", serif;
+        font-size: 22px;
+        font-weight: bold;
+        color: #7f1d1d;
+        letter-spacing: 0.18em;
+        line-height: 1;
+        margin-bottom: 0.9rem;
+        min-height: 70px;
+      }
+      .dev-role {
+        font-size: 12px;
+        color: #57534e;
+        letter-spacing: 0.12em;
+        margin-bottom: 0.85rem;
+      }
+      .dev-role::before,
+      .dev-role::after {
+        content: "·";
+        color: #a8a29e;
+        margin: 0 0.5em;
+      }
+      .dev-bio {
+        font-size: 12px;
+        line-height: 1.7;
+        color: #78716c;
+        margin: 0;
+      }
+
+      /* 滾動入場：可見時逐張顯露 */
+      .colophon .dev-card {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      .colophon.is-visible .dev-card {
+        animation: fade-in-up 0.55s ease-out forwards;
+        animation-delay: calc(var(--d) * 90ms);
+      }
+      .colophon.is-visible .dev-seal {
+        animation: seal-stamp 0.6s ease-out backwards;
+        animation-delay: calc(0.1s + var(--d) * 90ms);
+      }
+
       /* ---- 入場動畫 ---- */
       @keyframes seal-stamp {
         0%   { opacity: 0;   transform: rotate(-3deg) scale(0.4); }
@@ -195,6 +366,10 @@
       @keyframes fade-in-up {
         from { opacity: 0; transform: translateY(8px); }
         to   { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes bob {
+        0%, 100% { transform: translateY(0); }
+        50%      { transform: translateY(4px); }
       }
 
       /* ---- 視圖切換過渡 ---- */
@@ -220,6 +395,7 @@
       <section v-if="view === 'home'" key="home" class="homepage">
         <div class="paper-noise"></div>
 
+        <div class="hero-screen">
         <div class="home-content">
           <div class="hero-row">
             <!-- 朱印（TODO: 後期可替換爲甲方提供的正式 logo/印章） -->
@@ -257,6 +433,35 @@
           <button class="enter-btn" @click="enterSearch">進　入　檢　索</button>
           <div class="enter-hint">點 擊 進 入 數 據 檢 索</div>
         </div>
+
+        <!-- 滾動提示：邀請向下查看編纂者題名 -->
+        <button class="scroll-cue" @click="scrollToColophon" aria-label="查看編纂者題名">
+          <span>編 纂 者 題 名</span>
+          <span class="arrow">︾</span>
+        </button>
+        </div><!-- /.hero-screen -->
+
+        <!-- ============ 編纂者題名（開發人員題跋，占位） ============ -->
+        <section class="colophon" id="colophon" :class="{ 'is-visible': colophonVisible }">
+          <div class="colophon-head">
+            <span class="colophon-seal" aria-hidden="true">編<br />纂</span>
+            <h2 class="colophon-title">編 纂 者 題 名</h2>
+            <p class="colophon-sub">本數據庫由下列同仁協力編纂、校理、研製</p>
+          </div>
+          <div class="colophon-grid">
+            <article
+              class="dev-card"
+              v-for="(dev, i) in developers"
+              :key="i"
+              :style="{ '--d': i }"
+            >
+              <div class="dev-seal" aria-hidden="true">{{ dev.sealChar }}</div>
+              <div class="dev-name">{{ dev.name }}</div>
+              <div class="dev-role">{{ dev.role }}</div>
+              <p class="dev-bio">{{ dev.bio }}</p>
+            </article>
+          </div>
+        </section>
 
         <footer class="home-footer">
           <div class="double-line"></div>
@@ -375,6 +580,8 @@
                 v-if="item.Imge && item.Imge.length"
                 :src="getImageUrl(item.Imge)"
                 :alt="item.Character"
+                loading="lazy"
+                decoding="async"
                 class="w-full h-full object-contain object-center filter group-hover:brightness-95"
               />
               <div v-else class="text-stone-300 text-sm flex flex-col items-center">
@@ -580,33 +787,69 @@
     </div>
 
     <script>
-      const { createApp, ref, computed, onMounted, onBeforeUnmount } = Vue;
+      const { createApp, ref, computed, watch, onMounted, onBeforeUnmount } = Vue;
 
       createApp({
         setup() {
+          // ---- 狀態持久化：崩潰/刷新後恢復檢索位置，避免回到首頁 ----
+          const SS_KEY = 'hanzi-db-state';
+          let saved = {};
+          try { saved = JSON.parse(sessionStorage.getItem(SS_KEY) || '{}') || {}; } catch (e) { saved = {}; }
+
+          // 崩潰循環保護：若極短時間內連續重載（多半是同一頁渲染崩潰所致），
+          // 逐級降級——先退回第 1 頁，再退回首頁，避免用戶被困在反復閃退的頁面。
+          let restorePage = Number(saved.currentPage) || 1;
+          let forceHome = false;
+          try {
+            const now = Date.now();
+            const lastTs = Number(sessionStorage.getItem('hanzi-db-loadts')) || 0;
+            let quick = Number(sessionStorage.getItem('hanzi-db-quickreloads')) || 0;
+            quick = (now - lastTs < 8000) ? quick + 1 : 0;
+            sessionStorage.setItem('hanzi-db-quickreloads', String(quick));
+            sessionStorage.setItem('hanzi-db-loadts', String(now));
+            if (quick >= 1) restorePage = 1;   // 疑似崩潰重載：退回第 1 頁
+            if (quick >= 2) forceHome = true;   // 仍在反復重載：直接退回首頁
+          } catch (e) {}
+          // 把降級後的狀態立即寫回，避免下次重載又恢復到會崩潰的那一頁
+          saved.currentPage = restorePage;
+          if (forceHome) saved.view = 'home';
+          try { sessionStorage.setItem(SS_KEY, JSON.stringify(saved)); } catch (e) {}
+
           // ---- 視圖狀態：'home' = 首頁封面，'search' = 檢索功能 ----
-          const view = ref('home');
+          const view = ref((!forceHome && saved.view === 'search') ? 'search' : 'home');
           const enterSearch = () => { view.value = 'search'; };
+
+          // ---- 編纂者題名（開發人員介紹，占位數據，後期由甲方替換） ----
+          const developers = ref([
+            { sealChar: '甲', name: '開發者甲', role: '項目負責 / 架構', bio: '占位簡介——後期由甲方提供正式信息後替換。' },
+            { sealChar: '乙', name: '開發者乙', role: '前端設計 / 交互', bio: '占位簡介——後期替換。' },
+            { sealChar: '丙', name: '開發者丙', role: '數據整理 / 校理', bio: '占位簡介——後期替換。' },
+            { sealChar: '丁', name: '開發者丁', role: '後端 / 數據庫', bio: '占位簡介——後期替換。' },
+          ]);
+          const colophonVisible = ref(false);
+          const scrollToColophon = () => {
+            document.getElementById('colophon')?.scrollIntoView({ behavior: 'smooth' });
+          };
 
           // ---- 狀態 ----
           const characters  = ref([]);
           const loading     = ref(true);
           const error       = ref(null);
 
-          // 三個獨立檢索字段
-          const searchType      = ref('');  // 字種
-          const searchCharacter = ref('');  // 字位
-          const searchSymbol    = ref('');  // 語符
+          // 三個獨立檢索字段（崩潰/刷新後從 sessionStorage 恢復）
+          const searchType      = ref(saved.searchType      || '');  // 字種
+          const searchCharacter = ref(saved.searchCharacter || '');  // 字位
+          const searchSymbol    = ref(saved.searchSymbol    || '');  // 語符
 
           // 分頁狀態
-          const currentPage = ref(1);
+          const currentPage = ref(restorePage);
           const pageSize    = ref(18);
           const totalCount  = ref(0);
           const totalPages  = ref(0);
-          const jumpPage    = ref(1);
+          const jumpPage    = ref(restorePage);
 
           // 排序模式：'auto' | 'character' | 'type' | 'symbol'
-          const sortMode = ref('auto');
+          const sortMode = ref(saved.sortMode || 'auto');
 
           const sortOptions = [
             { value: 'auto',      label: '自動' },
@@ -871,9 +1114,40 @@
             return result;
           });
 
+          // ---- 持久化檢索狀態：視圖/檢索條件/頁碼/排序變化即寫入 sessionStorage ----
+          watch([view, searchType, searchCharacter, searchSymbol, currentPage, sortMode], () => {
+            try {
+              sessionStorage.setItem(SS_KEY, JSON.stringify({
+                view: view.value,
+                searchType: searchType.value,
+                searchCharacter: searchCharacter.value,
+                searchSymbol: searchSymbol.value,
+                currentPage: currentPage.value,
+                sortMode: sortMode.value,
+              }));
+            } catch (e) {}
+          });
+
           onMounted(() => {
-            fetchData(1);
+            // 恢復到檢索視圖時直接加載上次所在的頁；否則預載第 1 頁
+            fetchData(view.value === 'search' ? (currentPage.value || 1) : 1);
             window.addEventListener('keydown', onKey);
+
+            // 滾動到「編纂者題名」時觸發一次性顯露動畫
+            const colophonEl = document.getElementById('colophon');
+            if (colophonEl && 'IntersectionObserver' in window) {
+              const io = new IntersectionObserver((entries, obs) => {
+                entries.forEach((entry) => {
+                  if (entry.isIntersecting) {
+                    colophonVisible.value = true;
+                    obs.unobserve(entry.target);
+                  }
+                });
+              }, { threshold: 0.15 });
+              io.observe(colophonEl);
+            } else {
+              colophonVisible.value = true; // 不支持時直接顯示
+            }
           });
           onBeforeUnmount(() => {
             window.removeEventListener('keydown', onKey);
@@ -882,6 +1156,8 @@
           return {
             // 視圖切換
             view, enterSearch,
+            // 編纂者題名（開發人員介紹）
+            developers, colophonVisible, scrollToColophon,
             characters, loading, error,
             searchType, searchCharacter, searchSymbol,
             currentPage, pageSize, totalCount, totalPages, jumpPage,
