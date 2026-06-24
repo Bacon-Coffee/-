@@ -49,9 +49,14 @@ let mainWindow    = null;
 // ---- 首次启动时复制种子数据库 ----
 // 注意：Strapi 的 database.js 用 path.join() 而非 path.resolve() 拼接路径，
 // 绝对路径会被当成相对路径。因此直接复制到 backend/.tmp/data.db（默认位置）。
+// 打包后数据库放在可写的用户数据目录（NSIS 安装目录 Program Files 只读，Strapi 需写库）
+function getUserDbPath() {
+  return path.join(app.getPath('userData'), 'data.db');
+}
+
 function ensureDatabase() {
   if (!IS_PACKAGED) return; // 开发模式使用 backend/.tmp/data.db
-  const dbPath = path.join(BACKEND_DIR, '.tmp', 'data.db');
+  const dbPath = getUserDbPath();
   if (fs.existsSync(dbPath)) {
     console.log('[Electron] 数据库已存在:', dbPath);
     return;
@@ -71,7 +76,10 @@ function ensureDatabase() {
 function startStrapi() {
   console.log('[Electron] 正在启动 Strapi...', BACKEND_DIR);
 
-  const nodeCmd = process.platform === 'win32' ? 'node.exe' : resolveCmd('node');
+  // 打包后用随包内置的 Windows Node（无需用户机器安装 Node）；开发模式用系统 Node
+  const nodeCmd = IS_PACKAGED
+    ? path.join(process.resourcesPath, 'app', 'runtime', 'node.exe')
+    : (process.platform === 'win32' ? 'node.exe' : resolveCmd('node'));
   // 打包后使用 start-production.js（跳过 TS 检测），开发模式用 strapi CLI
   const startScript = IS_PACKAGED
     ? path.join(BACKEND_DIR, 'start-production.js')
@@ -86,6 +94,8 @@ function startStrapi() {
     env: {
       ...process.env,
       NODE_ENV: 'production',
+      // 打包后把数据库指向可写的 userData 目录（绝对路径，database.ts 已支持）
+      ...(IS_PACKAGED ? { DATABASE_FILENAME: getUserDbPath() } : {}),
     },
   });
 

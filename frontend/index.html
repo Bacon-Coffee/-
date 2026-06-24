@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>日本漢文寫本漢方文獻用字數據庫</title>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="lib/vue.global.prod.js"></script>
+    <script src="lib/tailwind.js"></script>
     <style>
       @font-face {
         font-family: "FZSuperCJK";
@@ -873,7 +873,7 @@
             return 'default';
           };
 
-          const API_TOKEN = 'c21a49ab9d05d68d493c0db6f7f8062e006ffec23ae71d9126041231f913c7ea42e991821e4ef3c4e26c33bd71c9a6bfb7fe834b6e4ebe80d36c81aa2f4ded1108e2b070e0fdf9630446d38fbe296d646e9963f0a485dbbb10619cab72978bbb4e6509883b1027f58a0f13930a1ad139b766b208b4d471473d3eac90be340b29';
+          // characters 已设为公开只读（见 backend/src/index.ts bootstrap），无需 token
           const API_BASE  = 'http://localhost:1337/api';
 
           // ---- 圖片 URL 解析 ----
@@ -1055,9 +1055,7 @@
             error.value = null;
             try {
               const query = buildQuery(page);
-              const response = await fetch(`${API_BASE}/characters?${query}`, {
-                headers: { Authorization: `Bearer ${API_TOKEN}` },
-              });
+              const response = await fetch(`${API_BASE}/characters?${query}`);
               if (!response.ok) throw new Error(`HTTP ${response.status}`);
               const result = await response.json();
               characters.value = result.data || [];

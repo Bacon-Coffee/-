@@ -44,7 +44,12 @@ export default ({ env }) => {
     },
     sqlite: {
       connection: {
-        filename: path.join(__dirname, '..', '..', env('DATABASE_FILENAME', '.tmp/data.db')),
+        // DATABASE_FILENAME 为绝对路径时直接使用（打包后由 Electron 注入 userData 路径）；
+        // 否则按相对项目根目录解析（开发模式默认 .tmp/data.db）。
+        filename: (() => {
+          const f = env('DATABASE_FILENAME', '.tmp/data.db');
+          return path.isAbsolute(f) ? f : path.join(__dirname, '..', '..', f);
+        })(),
       },
       useNullAsDefault: true,
     },
