@@ -24,3 +24,9 @@ backend/.env
 # 日志
 *.log
 npm-debug.log*
+
+# 构建工具缓存与捆绑运行时（本地保留，不提交；超过 GitHub 文件大小限制）
+electron-cache/
+eb-binaries/
+runtime/
+win-node/
