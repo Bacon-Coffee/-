@@ -83,20 +83,12 @@ module.exports = {
     ],
   },
 
-  // Windows 配置：NSIS 安装包（安装到本机、建快捷方式、数据持久）
+  // Windows 配置：zip 绿色版（免安装，解压后双击 .exe 即用，数据仍存 %APPDATA%）
   win: {
     icon: 'build/icon.ico',
     target: [
-      { target: 'nsis', arch: ['x64'] },
+      { target: 'zip', arch: ['x64'] },
     ],
-  },
-  nsis: {
-    oneClick: false,                 // 显示安装向导
-    perMachine: false,               // 默认按用户安装，免管理员
-    allowToChangeInstallationDirectory: true,
-    createDesktopShortcut: true,
-    createStartMenuShortcut: true,
-    shortcutName: '日本汉文写本汉方文献用字数据库',
   },
 
   // 输出目录
