@@ -4,7 +4,11 @@
 
 ### Windows 安装
 
-1. 下载安装包 **`日本汉文写本汉方文献用字数据库 Setup 1.0.0.exe`**
+> **国内一键下载**（点链接即开始下载，约 284 MB，详见 [下载说明.md](下载说明.md)）：
+> - 主链接：`https://ghfast.top/https://github.com/Bacon-Coffee/-/releases/download/v1.0.0/Hanzi-Database-Setup-1.0.0.exe`
+> - 备用：`https://gh-proxy.com/https://github.com/Bacon-Coffee/-/releases/download/v1.0.0/Hanzi-Database-Setup-1.0.0.exe`
+
+1. 下载安装包 **`Hanzi-Database-Setup-1.0.0.exe`**
 2. 双击运行，进入安装向导
 3. 按提示选择安装位置（默认按当前用户安装，**无需管理员权限**），点击「安装」
 4. 安装完成后，桌面与开始菜单会自动创建「日本汉文写本汉方文献用字数据库」快捷方式
