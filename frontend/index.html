@@ -466,11 +466,22 @@
         <footer class="home-footer">
           <div class="double-line"></div>
           <p>Version 0.1.0 · 日本漢文寫本漢方文獻用字數據庫</p>
+          <button
+            @click="enterAdmin"
+            title="管理後台（Ctrl+Shift+A）"
+            class="mt-2 text-[11px] text-stone-300 hover:text-red-700 transition"
+          >管　理</button>
         </footer>
       </section>
 
       <!-- ============ 檢索頁（原有功能） ============ -->
-      <div v-else key="search" class="container mx-auto px-4 py-8 max-w-7xl">
+      <div v-else-if="view === 'search'" key="search" class="container mx-auto px-4 py-8 max-w-7xl">
+      <div class="mb-4">
+        <button
+          @click="view = 'home'"
+          class="text-sm text-stone-500 hover:text-red-900 transition"
+        >← 返回首頁</button>
+      </div>
       <header class="text-center mb-10">
         <h1 class="text-4xl font-bold mb-2 text-red-900 tracking-widest">
           ✒️ 日本漢文寫本漢方文獻用字數據庫
@@ -783,6 +794,190 @@
       </div>
       <!-- /檢索頁 -->
 
+      <!-- ============ 管理後台（密碼進入，可增刪改） ============ -->
+      <div v-else key="admin" class="container mx-auto px-4 py-8 max-w-7xl">
+        <header class="flex items-center justify-between mb-8">
+          <h1 class="text-2xl font-bold text-red-900 tracking-widest">⚙️ 管理後台</h1>
+          <button @click="view = 'search'" class="text-sm text-stone-500 hover:text-red-900">← 返回檢索</button>
+        </header>
+
+        <!-- 未解鎖：密碼卡 -->
+        <div v-if="!isUnlocked" class="max-w-sm mx-auto mt-16 bg-white border-2 border-red-900 rounded-lg p-8 text-center shadow-lg">
+          <div class="text-4xl mb-4">🔒</div>
+          <h2 class="text-lg font-bold text-stone-700 mb-6">請輸入管理密碼</h2>
+          <input
+            v-model="adminPassword"
+            type="password"
+            placeholder="管理密碼"
+            @keyup.enter="unlock"
+            class="w-full p-3 text-base bg-white border-2 border-red-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-700 mb-3"
+          />
+          <p v-if="unlockError" class="text-red-600 text-sm mb-3">{{ unlockError }}</p>
+          <button
+            @click="unlock"
+            :disabled="unlocking"
+            class="w-full bg-red-900 text-white py-3 font-bold rounded-lg hover:bg-red-800 disabled:opacity-50 transition"
+          >{{ unlocking ? '驗證中…' : '解　鎖' }}</button>
+        </div>
+
+        <!-- 已解鎖：管理界面 -->
+        <template v-else>
+          <!-- 工具欄 -->
+          <div class="flex flex-wrap items-center gap-3 mb-4">
+            <button @click="openCreate" class="bg-red-900 text-white px-5 py-2 rounded-lg font-bold hover:bg-red-800 transition">＋ 新建記錄</button>
+            <input v-model="searchType" @keyup.enter="doSearch" placeholder="字種" class="p-2 border-2 border-stone-300 rounded-lg text-sm w-24" />
+            <input v-model="searchCharacter" @keyup.enter="doSearch" placeholder="字位" class="p-2 border-2 border-stone-300 rounded-lg text-sm w-24" />
+            <input v-model="searchSymbol" @keyup.enter="doSearch" placeholder="語符" class="p-2 border-2 border-stone-300 rounded-lg text-sm w-24" />
+            <button @click="doSearch" class="bg-stone-700 text-white px-4 py-2 rounded-lg text-sm hover:bg-stone-600 transition">檢索</button>
+            <button @click="clearSearch" class="bg-stone-200 text-stone-700 px-3 py-2 rounded-lg text-sm hover:bg-stone-300 transition">清空</button>
+            <span class="ml-auto text-sm text-stone-500">共 {{ totalCount }} 條</span>
+            <button @click="lock" class="text-sm text-stone-500 hover:text-red-900 border border-stone-300 px-3 py-2 rounded-lg">🔒 鎖定退出</button>
+          </div>
+
+          <p v-if="adminError" class="text-red-600 text-sm mb-3">{{ adminError }}</p>
+
+          <!-- 加載 -->
+          <div v-if="loading" class="flex justify-center items-center py-20">
+            <div class="animate-spin rounded-full h-10 w-10 border-4 border-stone-300 border-t-red-900"></div>
+          </div>
+
+          <!-- 記錄表格 -->
+          <div v-else class="overflow-x-auto bg-white border border-stone-300 rounded-lg">
+            <table class="w-full text-sm">
+              <thead class="bg-stone-100 text-stone-600">
+                <tr>
+                  <th class="px-3 py-2 text-left">圖片</th>
+                  <th class="px-3 py-2 text-left">編號</th>
+                  <th class="px-3 py-2 text-left">字位</th>
+                  <th class="px-3 py-2 text-left">字種</th>
+                  <th class="px-3 py-2 text-left">語符</th>
+                  <th class="px-3 py-2 text-left">時代</th>
+                  <th class="px-3 py-2 text-right">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in characters" :key="item.id" class="border-t border-stone-100 hover:bg-stone-50">
+                  <td class="px-3 py-2">
+                    <img v-if="item.Imge && item.Imge.length" :src="getImageUrl(item.Imge)" class="w-12 h-12 object-contain bg-stone-50 rounded" />
+                    <span v-else class="text-stone-300 text-xs">無</span>
+                  </td>
+                  <td class="px-3 py-2 text-stone-500">{{ item.Index }}</td>
+                  <td class="px-3 py-2 text-xl font-bold text-stone-800">{{ item.Character }}</td>
+                  <td class="px-3 py-2">{{ item.Type || '—' }}</td>
+                  <td class="px-3 py-2">{{ item.Symbol || '—' }}</td>
+                  <td class="px-3 py-2">{{ item.Era || '—' }}</td>
+                  <td class="px-3 py-2 text-right whitespace-nowrap">
+                    <button @click="openEdit(item)" class="text-red-800 hover:underline mr-3">編輯</button>
+                    <button @click="deleteRecord(item)" class="text-stone-400 hover:text-red-600">刪除</button>
+                  </td>
+                </tr>
+                <tr v-if="characters.length === 0">
+                  <td colspan="7" class="text-center py-12 text-stone-400">暫無記錄</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- 分頁 -->
+          <div v-if="totalPages > 1" class="mt-6 flex justify-center items-center gap-3 flex-wrap">
+            <button @click="fetchData(currentPage - 1)" :disabled="currentPage <= 1" class="px-4 py-2 rounded border border-stone-300 text-stone-600 hover:bg-stone-100 disabled:opacity-30 transition">← 上一頁</button>
+            <span class="text-sm text-stone-500">第 {{ currentPage }} / {{ totalPages }} 頁</span>
+            <button @click="fetchData(currentPage + 1)" :disabled="currentPage >= totalPages" class="px-4 py-2 rounded border border-stone-300 text-stone-600 hover:bg-stone-100 disabled:opacity-30 transition">下一頁 →</button>
+          </div>
+        </template>
+
+        <!-- ============ 新建/編輯表單模態框 ============ -->
+        <transition
+          enter-active-class="transition duration-200 ease-out"
+          enter-from-class="opacity-0"
+          leave-active-class="transition duration-150 ease-in"
+          leave-to-class="opacity-0"
+        >
+          <div
+            v-if="formOpen"
+            class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+            @click.self="closeForm"
+          >
+            <div class="bg-[#fdfaf2] border-2 border-red-900 rounded-lg shadow-2xl w-full max-w-3xl max-h-[92vh] overflow-hidden flex flex-col">
+              <div class="flex items-center justify-between px-6 py-3 border-b border-stone-300 bg-white">
+                <h2 class="text-lg font-bold text-red-900">{{ form.documentId ? '編輯記錄' : '新建記錄' }}</h2>
+                <button @click="closeForm" class="text-stone-400 hover:text-red-900 text-2xl leading-none w-8 h-8 flex items-center justify-center rounded hover:bg-stone-100">✕</button>
+              </div>
+
+              <div class="flex-1 overflow-y-auto p-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                  <label class="flex flex-col text-sm">
+                    <span class="text-stone-500 mb-1">編號 Index <span class="text-red-600">*</span></span>
+                    <input v-model="form.Index" class="p-2 border-2 border-stone-300 rounded focus:border-red-700 focus:outline-none" />
+                  </label>
+                  <label class="flex flex-col text-sm">
+                    <span class="text-stone-500 mb-1">字位 Character <span class="text-red-600">*</span></span>
+                    <input v-model="form.Character" class="p-2 border-2 border-stone-300 rounded focus:border-red-700 focus:outline-none" />
+                  </label>
+                  <label class="flex flex-col text-sm">
+                    <span class="text-stone-500 mb-1">字種 Type <span class="text-red-600">*</span></span>
+                    <input v-model="form.Type" class="p-2 border-2 border-stone-300 rounded focus:border-red-700 focus:outline-none" />
+                  </label>
+                  <label class="flex flex-col text-sm">
+                    <span class="text-stone-500 mb-1">語符 Symbol</span>
+                    <input v-model="form.Symbol" class="p-2 border-2 border-stone-300 rounded focus:border-red-700 focus:outline-none" />
+                  </label>
+                  <label class="flex flex-col text-sm">
+                    <span class="text-stone-500 mb-1">出處 Source</span>
+                    <input v-model="form.Source" class="p-2 border-2 border-stone-300 rounded focus:border-red-700 focus:outline-none" />
+                  </label>
+                  <label class="flex flex-col text-sm">
+                    <span class="text-stone-500 mb-1">時代 Era</span>
+                    <input v-model="form.Era" class="p-2 border-2 border-stone-300 rounded focus:border-red-700 focus:outline-none" />
+                  </label>
+                  <label class="flex flex-col text-sm">
+                    <span class="text-stone-500 mb-1">用法 Usage</span>
+                    <input v-model="form.Usage" class="p-2 border-2 border-stone-300 rounded focus:border-red-700 focus:outline-none" />
+                  </label>
+                  <label class="flex flex-col text-sm">
+                    <span class="text-stone-500 mb-1">檢索索引 SearchIndex</span>
+                    <input v-model="form.SearchIndex" class="p-2 border-2 border-stone-300 rounded focus:border-red-700 focus:outline-none" />
+                  </label>
+                </div>
+                <label class="flex flex-col text-sm">
+                  <span class="text-stone-500 mb-1">備註 Note</span>
+                  <textarea v-model="form.Note" rows="2" class="p-2 border-2 border-stone-300 rounded focus:border-red-700 focus:outline-none"></textarea>
+                </label>
+
+                <!-- 圖片管理 -->
+                <div>
+                  <div class="text-sm text-stone-500 mb-2">圖片 Imge <span class="text-red-600">*</span>（至少保留一張）</div>
+                  <div class="flex flex-wrap gap-3">
+                    <div v-for="(img, idx) in form.existingImages" :key="'e' + idx" class="relative w-24 h-24 border border-stone-300 rounded bg-white">
+                      <img :src="img.url" class="w-full h-full object-contain" />
+                      <button @click="removeExisting(idx)" type="button" class="absolute -top-2 -right-2 bg-red-700 text-white rounded-full w-5 h-5 text-xs leading-none flex items-center justify-center hover:bg-red-600">✕</button>
+                    </div>
+                    <div v-for="(p, idx) in form.pendingFiles" :key="'p' + idx" class="relative w-24 h-24 border border-dashed border-red-400 rounded bg-white overflow-hidden">
+                      <img :src="p.url" class="w-full h-full object-contain" />
+                      <span class="absolute bottom-0 left-0 right-0 bg-red-700/80 text-white text-[10px] text-center">待上傳</span>
+                      <button @click="removePending(idx)" type="button" class="absolute -top-2 -right-2 bg-red-700 text-white rounded-full w-5 h-5 text-xs leading-none flex items-center justify-center hover:bg-red-600">✕</button>
+                    </div>
+                    <label class="w-24 h-24 border-2 border-dashed border-stone-300 rounded flex flex-col items-center justify-center text-stone-400 cursor-pointer hover:border-red-700 hover:text-red-700 transition">
+                      <span class="text-2xl leading-none">＋</span>
+                      <span class="text-xs mt-1">添加圖片</span>
+                      <input type="file" accept="image/*" multiple class="hidden" @change="onFilesSelected" />
+                    </label>
+                  </div>
+                </div>
+
+                <p v-if="adminError" class="text-red-600 text-sm">{{ adminError }}</p>
+              </div>
+
+              <div class="flex justify-end gap-3 px-6 py-3 border-t border-stone-300 bg-white">
+                <button @click="closeForm" class="px-5 py-2 rounded-lg border border-stone-300 text-stone-600 hover:bg-stone-100 transition">取消</button>
+                <button @click="saveRecord" :disabled="saving" class="bg-red-900 text-white px-6 py-2 rounded-lg font-bold hover:bg-red-800 disabled:opacity-50 transition">{{ saving ? '保存中…' : '保存' }}</button>
+              </div>
+            </div>
+          </div>
+        </transition>
+      </div>
+      <!-- /管理後台 -->
+
       </transition>
     </div>
 
@@ -1020,9 +1215,193 @@
             isDragging.value = false;
           };
 
-          // ---- 全局 ESC：先關 viewer，再關 detail ----
+          // ================= 管理後台（密碼進入 → 寫入令牌 → 增刪改） =================
+          const ADMIN_SS_KEY = 'hanzi-db-admin';
+          const adminToken  = ref(sessionStorage.getItem(ADMIN_SS_KEY) || null);
+          const isUnlocked  = computed(() => !!adminToken.value);
+          const authHeaders = () => ({ Authorization: `Bearer ${adminToken.value}` });
+
+          const adminPassword = ref('');
+          const unlockError   = ref('');
+          const unlocking     = ref(false);
+          const adminError    = ref('');
+          const saving        = ref(false);
+          const formOpen      = ref(false);
+
+          const blankForm = () => ({
+            documentId: null,
+            Index: '', Character: '', Type: '', Symbol: '',
+            Source: '', Era: '', Usage: '', SearchIndex: '', Note: '',
+            existingImages: [], pendingFiles: [],
+          });
+          const form = ref(blankForm());
+
+          // 進入管理視圖（首頁底部「管理」鏈接 / Ctrl+Shift+A / #admin）
+          const enterAdmin = () => {
+            view.value = 'admin';
+            if (isUnlocked.value) fetchData(currentPage.value || 1);
+          };
+          const onHashChange = () => {
+            if (window.location.hash === '#admin') view.value = 'admin';
+          };
+
+          // 密碼解鎖：後端校驗 → 取回寫入令牌
+          const unlock = async () => {
+            if (unlocking.value) return;
+            unlockError.value = '';
+            if (!adminPassword.value) { unlockError.value = '請輸入密碼'; return; }
+            unlocking.value = true;
+            try {
+              const res = await fetch(`${API_BASE}/admin-auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: adminPassword.value }),
+              });
+              if (!res.ok) {
+                unlockError.value = res.status === 401 ? '密碼錯誤' : `登錄失敗 HTTP ${res.status}`;
+                return;
+              }
+              const data = await res.json();
+              adminToken.value = data.token;
+              sessionStorage.setItem(ADMIN_SS_KEY, data.token);
+              adminPassword.value = '';
+              await fetchData(1);
+            } catch (e) {
+              unlockError.value = `登錄失敗：${e.message}`;
+            } finally {
+              unlocking.value = false;
+            }
+          };
+
+          const lock = () => {
+            adminToken.value = null;
+            sessionStorage.removeItem(ADMIN_SS_KEY);
+            formOpen.value = false;
+            view.value = 'search';
+          };
+
+          // 打開新建 / 編輯表單
+          const openCreate = () => {
+            adminError.value = '';
+            form.value = blankForm();
+            formOpen.value = true;
+          };
+          const openEdit = (item) => {
+            adminError.value = '';
+            form.value = {
+              documentId: item.documentId,
+              Index: item.Index || '', Character: item.Character || '', Type: item.Type || '',
+              Symbol: item.Symbol || '', Source: item.Source || '', Era: item.Era || '',
+              Usage: item.Usage || '', SearchIndex: item.SearchIndex || '', Note: item.Note || '',
+              existingImages: Array.isArray(item.Imge)
+                ? item.Imge.map((f) => ({ id: f.id, url: resolveImgUrl(f), name: f.name || '' }))
+                : [],
+              pendingFiles: [],
+            };
+            formOpen.value = true;
+          };
+          const closeForm = () => {
+            form.value.pendingFiles.forEach((p) => URL.revokeObjectURL(p.url));
+            formOpen.value = false;
+          };
+
+          const removeExisting = (idx) => { form.value.existingImages.splice(idx, 1); };
+          const onFilesSelected = (e) => {
+            const files = Array.from(e.target.files || []);
+            for (const file of files) {
+              form.value.pendingFiles.push({ file, url: URL.createObjectURL(file), name: file.name });
+            }
+            e.target.value = ''; // 允許再次選擇同一文件
+          };
+          const removePending = (idx) => {
+            const p = form.value.pendingFiles[idx];
+            if (p) URL.revokeObjectURL(p.url);
+            form.value.pendingFiles.splice(idx, 1);
+          };
+
+          // 上傳待傳圖片，返回 file id 數組（鏡像 backend/scripts/import-images.js）
+          const uploadFiles = async (files) => {
+            const fd = new FormData();
+            for (const file of files) fd.append('files', file, file.name); // 字段名固定 files；勿手設 Content-Type
+            const res = await fetch(`${API_BASE}/upload`, {
+              method: 'POST', headers: authHeaders(), body: fd,
+            });
+            if (!res.ok) throw new Error(`圖片上傳失敗 HTTP ${res.status}`);
+            return (await res.json()).map((x) => x.id);
+          };
+
+          // 保存（新建 POST / 編輯 PUT；務必帶 publishedAt 才會被公開檢索到）
+          const saveRecord = async () => {
+            if (saving.value) return;
+            adminError.value = '';
+            const f = form.value;
+            if (!f.Index.trim() || !f.Character.trim() || !f.Type.trim()) {
+              adminError.value = '編號 / 字位 / 字種 為必填';
+              return;
+            }
+            const keepIds = f.existingImages.map((i) => i.id);
+            if (keepIds.length + f.pendingFiles.length === 0) {
+              adminError.value = 'Imge 為必填：請至少添加一張圖片';
+              return;
+            }
+            saving.value = true;
+            try {
+              let newIds = [];
+              if (f.pendingFiles.length) {
+                newIds = await uploadFiles(f.pendingFiles.map((p) => p.file));
+              }
+              const imageIds = keepIds.concat(newIds);
+              const payload = { data: {
+                Index: f.Index.trim(), Character: f.Character.trim(), Type: f.Type.trim(),
+                Symbol: f.Symbol, Source: f.Source, Era: f.Era,
+                Usage: f.Usage, SearchIndex: f.SearchIndex, Note: f.Note,
+                Imge: imageIds,
+                publishedAt: new Date().toISOString(),
+              }};
+              const editing = !!f.documentId;
+              const url = `${API_BASE}/characters${editing ? '/' + f.documentId : ''}`;
+              const res = await fetch(url, {
+                method: editing ? 'PUT' : 'POST',
+                headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+              });
+              if (!res.ok) throw new Error(await res.text()); // 暴露 Index 重複 / 缺必填等服務端報錯
+              closeForm();
+              await fetchData(currentPage.value);
+            } catch (e) {
+              adminError.value = `保存失敗：${e.message}`;
+            } finally {
+              saving.value = false;
+            }
+          };
+
+          // 刪除
+          const deleteRecord = async (item) => {
+            if (!confirm(`確認刪除記錄「${item.Index} ${item.Character}」？此操作不可撤銷。`)) return;
+            adminError.value = '';
+            try {
+              const res = await fetch(`${API_BASE}/characters/${item.documentId}`, {
+                method: 'DELETE', headers: authHeaders(),
+              });
+              if (!res.ok) throw new Error(`刪除失敗 HTTP ${res.status}`);
+              // 若刪除的是本頁最後一條，回退一頁
+              const targetPage = (characters.value.length === 1 && currentPage.value > 1)
+                ? currentPage.value - 1 : currentPage.value;
+              await fetchData(targetPage);
+            } catch (e) {
+              adminError.value = `刪除失敗：${e.message}`;
+            }
+          };
+
+          // ---- 全局 ESC / 管理快捷鍵 ----
           const onKey = (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+              e.preventDefault();
+              enterAdmin();
+              return;
+            }
             if (e.key !== 'Escape') return;
+            if (formOpen.value) { closeForm(); return; }
             if (viewerOpen.value) closeViewer();
             else if (detailOpen.value) closeDetail();
           };
@@ -1127,6 +1506,9 @@
           });
 
           onMounted(() => {
+            // 支持通過 #admin 直接進入管理視圖
+            onHashChange();
+            window.addEventListener('hashchange', onHashChange);
             // 恢復到檢索視圖時直接加載上次所在的頁；否則預載第 1 頁
             fetchData(view.value === 'search' ? (currentPage.value || 1) : 1);
             window.addEventListener('keydown', onKey);
@@ -1149,6 +1531,7 @@
           });
           onBeforeUnmount(() => {
             window.removeEventListener('keydown', onKey);
+            window.removeEventListener('hashchange', onHashChange);
           });
 
           return {
@@ -1170,6 +1553,11 @@
             zoomScale, zoomTranslateX, zoomTranslateY, isDragging,
             openViewer, closeViewer, resetViewer,
             onViewerWheel, onViewerMouseDown, onViewerMouseMove, onViewerMouseUp,
+            // 管理後台
+            isUnlocked, adminPassword, unlockError, unlocking, unlock, lock, enterAdmin,
+            adminError, saving, formOpen, form,
+            openCreate, openEdit, closeForm, saveRecord, deleteRecord,
+            removeExisting, removePending, onFilesSelected,
           };
         },
       }).mount('#app');

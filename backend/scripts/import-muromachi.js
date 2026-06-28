@@ -30,9 +30,14 @@ const XLSX = require('xlsx');
 const argv       = process.argv.slice(2);
 const DRY_RUN    = argv.includes('--dry-run'); // 仅解析 + 无图校验，不连 Strapi、不写库
 const CLI_PATH   = argv.find(a => !a.startsWith('--'));
+// 令牌不再硬编码：从 backend/.env 读取 ADMIN_WRITE_TOKEN，或环境变量 STRAPI_TOKEN
+try { require('dotenv').config({ path: path.resolve(__dirname, '../.env') }); } catch (e) {}
 const STRAPI_URL = process.env.STRAPI_URL   || 'http://localhost:1337';
-const API_TOKEN  = process.env.STRAPI_TOKEN ||
-  'c21a49ab9d05d68d493c0db6f7f8062e006ffec23ae71d9126041231f913c7ea42e991821e4ef3c4e26c33bd71c9a6bfb7fe834b6e4ebe80d36c81aa2f4ded1108e2b070e0fdf9630446d38fbe296d646e9963f0a485dbbb10619cab72978bbb4e6509883b1027f58a0f13930a1ad139b766b208b4d471473d3eac90be340b29';
+const API_TOKEN  = process.env.STRAPI_TOKEN || process.env.ADMIN_WRITE_TOKEN;
+if (!API_TOKEN && !DRY_RUN) {
+  console.error('✖ 缺少 API 令牌：请在 backend/.env 设置 ADMIN_WRITE_TOKEN，或导出环境变量 STRAPI_TOKEN');
+  process.exit(1);
+}
 
 const HEADERS = { Authorization: `Bearer ${API_TOKEN}` };
 const delay   = (ms) => new Promise(r => setTimeout(r, ms));
